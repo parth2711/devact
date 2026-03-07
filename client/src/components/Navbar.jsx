@@ -25,6 +25,7 @@ function Navbar() {
         {user ? (
           <>
             <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+            <Link to="/github" className={isActive('/github')}>GitHub</Link>
             <Link to="/profile" className={isActive('/profile')}>Profile</Link>
             <button onClick={handleLogout} className="btn btn-secondary btn-sm">Logout</button>
           </>
