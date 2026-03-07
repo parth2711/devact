@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import API from '../api/axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -13,12 +16,14 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
-      const { data } = await API.post('/auth/register', formData);
-      localStorage.setItem('devact_token', data.token);
-      window.location.href = '/dashboard';
+      await register(formData.name, formData.email, formData.password);
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,7 +70,9 @@ function Register() {
               minLength={6}
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-full">Register</button>
+          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+            {loading ? 'Creating account...' : 'Register'}
+          </button>
         </form>
         <p className="auth-switch">
           Already have an account? <Link to="/login">Login</Link>

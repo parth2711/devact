@@ -1,13 +1,17 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Navbar() {
   const location = useLocation();
-  const token = localStorage.getItem('devact_token');
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('devact_token');
-    window.location.href = '/';
+    logout();
+    navigate('/');
   };
+
+  const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
     <nav className="navbar">
@@ -18,21 +22,16 @@ function Navbar() {
         </Link>
       </div>
       <div className="navbar-links">
-        {token ? (
+        {user ? (
           <>
-            <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>
-              Dashboard
-            </Link>
+            <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+            <Link to="/profile" className={isActive('/profile')}>Profile</Link>
             <button onClick={handleLogout} className="btn btn-secondary btn-sm">Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login" className={location.pathname === '/login' ? 'active' : ''}>
-              Login
-            </Link>
-            <Link to="/register" className="btn btn-primary btn-sm">
-              Sign Up
-            </Link>
+            <Link to="/login" className={isActive('/login')}>Login</Link>
+            <Link to="/register" className="btn btn-primary btn-sm">Sign Up</Link>
           </>
         )}
       </div>

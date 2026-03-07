@@ -396,6 +396,72 @@ a:hover {
   margin-top: auto;
 }
 
+/* ── Profile Page ── */
+.profile-page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+  padding-top: 3rem;
+}
+
+.profile-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--shadow-md);
+}
+
+.profile-card h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.profile-subtitle {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-section {
+  margin-bottom: 1.5rem;
+}
+
+.form-section h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.success-msg {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success-color);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badge-connected {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success-color);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .hero h1 {
@@ -415,8 +481,10 @@ a:hover {
     padding: 0.8rem 1rem;
   }
 
-  .auth-card {
+  .auth-card,
+  .profile-card {
     margin: 1rem;
     padding: 1.5rem;
   }
 }
+
