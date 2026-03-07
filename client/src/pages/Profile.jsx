@@ -44,7 +44,7 @@ function Profile() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-section">
-            <h3>👤 Personal Info</h3>
+            <h3>Personal Info</h3>
             <div className="form-group">
               <label htmlFor="name">Display Name</label>
               <input
@@ -59,7 +59,7 @@ function Profile() {
           </div>
 
           <div className="form-section">
-            <h3>🔗 Connected Accounts</h3>
+            <h3>Connected Accounts</h3>
             <div className="form-group">
               <label htmlFor="githubUsername">GitHub Username</label>
               <input

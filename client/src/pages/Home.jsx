@@ -14,19 +14,19 @@ function Home() {
 
       <section className="features">
         <div className="feature-card">
-          <h3>🔗 GitHub Tracker</h3>
+          <h3>GitHub Tracker</h3>
           <p>Monitor commits, PRs, and contribution streaks across all your repositories.</p>
         </div>
         <div className="feature-card">
-          <h3>🏆 CP Tracker</h3>
+          <h3>CP Tracker</h3>
           <p>Track your Codeforces rating, LeetCode progress, and contest history.</p>
         </div>
         <div className="feature-card">
-          <h3>📊 Repo Visualizer</h3>
+          <h3>Repo Visualizer</h3>
           <p>Visualize repository stats, language breakdown, and activity heatmaps.</p>
         </div>
         <div className="feature-card">
-          <h3>📈 Dashboard</h3>
+          <h3>Dashboard</h3>
           <p>A unified dashboard bringing all your developer metrics together.</p>
         </div>
       </section>

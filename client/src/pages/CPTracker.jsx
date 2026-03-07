@@ -55,7 +55,7 @@ function CPTracker() {
     return (
       <div className="page cp-page">
         <div className="empty-state">
-          <h2>🏆 Connect CP Accounts</h2>
+          <h2>Connect CP Accounts</h2>
           <p>Set your Codeforces handle or LeetCode username in your profile to start tracking.</p>
           <Link to="/profile" className="btn btn-primary">Go to Profile</Link>
         </div>
@@ -67,7 +67,7 @@ function CPTracker() {
     return (
       <div className="page cp-page">
         <div className="empty-state">
-          <h2>⚠️ Error</h2>
+          <h2>Error</h2>
           <p>{error}</p>
           <button onClick={fetchCPData} className="btn btn-primary">Retry</button>
         </div>
@@ -82,7 +82,7 @@ function CPTracker() {
       {/* Codeforces Section */}
       {hasCF && cfStats && (
         <>
-          <h3 className="section-title">🟦 Codeforces — {cfStats.userInfo.handle}</h3>
+          <h3 className="section-title">Codeforces — {cfStats.userInfo.handle}</h3>
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-value">{cfStats.userInfo.rating}</span>
@@ -105,7 +105,7 @@ function CPTracker() {
           {/* Recent Rating Changes */}
           {cfStats.ratingHistory.length > 0 && (
             <div className="cp-section">
-              <h4>📈 Recent Contests</h4>
+              <h4>Recent Contests</h4>
               <div className="contest-list">
                 {cfStats.ratingHistory.slice(-5).reverse().map((c) => (
                   <div key={c.contestId} className="contest-item">
@@ -128,7 +128,7 @@ function CPTracker() {
           {/* Recent Submissions */}
           {cfSubmissions.length > 0 && (
             <div className="cp-section">
-              <h4>📝 Recent Submissions</h4>
+              <h4>Recent Submissions</h4>
               <div className="submissions-list">
                 {cfSubmissions.slice(0, 10).map((sub) => (
                   <div key={sub.id} className="submission-item">
@@ -157,7 +157,7 @@ function CPTracker() {
       {/* LeetCode Section */}
       {hasLC && lcStats && (
         <>
-          <h3 className="section-title lc-title">🟨 LeetCode — {lcStats.username}</h3>
+          <h3 className="section-title lc-title">LeetCode — {lcStats.username}</h3>
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-value">{lcStats.solved.all}</span>

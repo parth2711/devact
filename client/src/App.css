@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root {
   --bg-primary: #0a0a0f;
@@ -21,6 +21,8 @@
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 30px rgba(139, 92, 246, 0.15);
   --transition: all 0.25s ease;
+  --font-heading: 'Space Grotesk', -apple-system, sans-serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
 }
 
 * {
@@ -30,7 +32,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-body);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -53,6 +55,11 @@ a:hover {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
 
 .main-content {
@@ -84,16 +91,13 @@ a:hover {
   align-items: center;
   gap: 0.5rem;
   color: var(--text-primary);
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.3rem;
 }
 
 .navbar-brand a:hover {
   color: var(--text-primary);
-}
-
-.logo-icon {
-  font-size: 1.5rem;
 }
 
 .logo-text {

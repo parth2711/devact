@@ -17,7 +17,6 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/">
-          <span className="logo-icon">⚡</span>
           <span className="logo-text">DevAct</span>
         </Link>
       </div>
