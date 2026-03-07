@@ -68,4 +68,28 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getMe };
+// @desc    Update user profile
+// @route   PATCH /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+  try {
+    const { name, githubUsername, codeforcesHandle, leetcodeUsername } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        ...(name && { name }),
+        ...(githubUsername !== undefined && { githubUsername }),
+        ...(codeforcesHandle !== undefined && { codeforcesHandle }),
+        ...(leetcodeUsername !== undefined && { leetcodeUsername }),
+      },
+      { new: true, runValidators: true }
+    );
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, getMe, updateProfile };
