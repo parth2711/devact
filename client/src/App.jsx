@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import CPTracker from './pages/CPTracker';
 import './App.css';
 
 function App() {
@@ -34,6 +35,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cp"
+                element={
+                  <ProtectedRoute>
+                    <CPTracker />
                   </ProtectedRoute>
                 }
               />

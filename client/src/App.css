@@ -462,6 +462,260 @@ a:hover {
   transform: none !important;
 }
 
+/* ── Shared Page Styles ── */
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 2rem 0 1rem;
+}
+
+.section-title.lc-title {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.empty-state h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+/* ── Stats Grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+}
+
+.stat-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.3rem;
+}
+
+/* ── CP Section ── */
+.cp-section {
+  margin-bottom: 2rem;
+}
+
+.cp-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.cf-rank {
+  font-size: 1rem !important;
+  text-transform: capitalize;
+}
+
+/* ── Contest List ── */
+.contest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contest-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.contest-item:hover {
+  background: var(--bg-card-hover);
+}
+
+.contest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.contest-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.contest-rank {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.contest-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-change {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.rating-change.positive {
+  color: var(--success-color);
+}
+
+.rating-change.negative {
+  color: var(--error-color);
+}
+
+.new-rating {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ── Submissions ── */
+.submissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.submission-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.submission-item:hover {
+  background: var(--bg-card-hover);
+}
+
+.submission-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.submission-problem {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.submission-difficulty {
+  font-size: 0.72rem;
+  color: var(--accent-primary);
+  background: rgba(139, 92, 246, 0.1);
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+}
+
+.submission-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.verdict {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  border-radius: 10px;
+}
+
+.verdict.accepted {
+  color: var(--success-color);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.verdict.rejected {
+  color: var(--error-color);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.submission-lang {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ── LeetCode difficulty cards ── */
+.lc-easy .stat-value {
+  background: none;
+  -webkit-text-fill-color: #22c55e;
+  color: #22c55e;
+}
+
+.lc-medium .stat-value {
+  background: none;
+  -webkit-text-fill-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.lc-hard .stat-value {
+  background: none;
+  -webkit-text-fill-color: #ef4444;
+  color: #ef4444;
+}
+
+.lc-ranking {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .hero h1 {
