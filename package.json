@@ -1,0 +1,18 @@
+{
+  "name": "devact",
+  "version": "1.0.0",
+  "description": "A platform for developers to track and aggregate their work alongside competitive programming",
+  "main": "server/index.js",
+  "scripts": {
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": ["developer", "tracker", "competitive-programming", "github", "mern"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
