@@ -4,8 +4,10 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
-// Load env vars
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Load env vars (only required locally, Vercel injects them)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.resolve(__dirname, '../.env') });
+}
 
 // ── MongoDB Connection (cached for serverless) ──
 let isConnected = false;
