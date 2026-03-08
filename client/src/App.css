@@ -615,6 +615,13 @@ select.form-input option {
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+a.bento-card {
+  text-decoration: none;
+  color: inherit;
 }
 
 .bento-card::before {
@@ -637,6 +644,54 @@ select.form-input option {
   opacity: 1;
 }
 
+/* ── Repo Cards (inside bento grids) ── */
+.repo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+  gap: 1rem;
+}
+
+.repo-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.repo-lang {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.repo-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  flex-grow: 1;
+}
+
+.repo-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 /* timeline */
 .timeline {
   position: relative;
@@ -652,7 +707,7 @@ select.form-input option {
 
 .timeline-event {
   position: relative;
-  padding-bottom: 1.5rem;
+  padding-bottom: 2rem;
 }
 
 .timeline-event::before {
@@ -669,8 +724,9 @@ select.form-input option {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .activity-text {
@@ -684,6 +740,7 @@ select.form-input option {
 
 .activity-repo {
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .activity-time {
