@@ -1,15 +1,24 @@
 import { Link } from 'react-router-dom';
 import { Github, Code, BarChart2, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="page home-page">
       <section className="hero">
         <h1>DevAct</h1>
-        <p>Track your developer activity &amp; competitive programming journey — all in one place.</p>
+        <p>Track your developer activity & competitive programming journey — all in one place.</p>
         <div className="hero-actions">
-          <Link to="/register" className="btn btn-primary">Get Started</Link>
-          <Link to="/login" className="btn btn-secondary">Login</Link>
+          {user ? (
+            <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
+          ) : (
+            <>
+              <Link to="/register" className="btn btn-primary">Get Started</Link>
+              <Link to="/login" className="btn btn-secondary">Login</Link>
+            </>
+          )}
         </div>
       </section>
 
