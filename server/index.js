@@ -1,11 +1,13 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
 
-// Load env vars — works for both local (.env at root) and Vercel (env vars set in dashboard)
-dotenv.config({ path: '../.env' });
-dotenv.config(); // fallback: load from process.env (Vercel)
+// Load env vars — try local .env first, Vercel provides env vars automatically
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config();
+
+const connectDB = require('./config/db');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -20,7 +22,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
+// Connect to MongoDB (cached for serverless)
 connectDB();
 
 // Mount routes
