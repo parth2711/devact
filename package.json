@@ -1,6 +1,6 @@
 {
   "name": "devact",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A platform for developers to track and aggregate their work alongside competitive programming",
   "main": "server/index.js",
   "scripts": {
