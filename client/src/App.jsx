@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import CPTracker from './pages/CPTracker';
+import RepoVisualizer from './pages/RepoVisualizer';
 import './App.css';
 
 function App() {
@@ -43,6 +44,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CPTracker />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/repos"
+                element={
+                  <ProtectedRoute>
+                    <RepoVisualizer />
                   </ProtectedRoute>
                 }
               />

@@ -25,6 +25,7 @@ function Navbar() {
           <>
             <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
             <Link to="/cp" className={isActive('/cp')}>CP</Link>
+            <Link to="/repos" className={isActive('/repos')}>Repos</Link>
             <Link to="/profile" className={isActive('/profile')}>Profile</Link>
             <button onClick={handleLogout} className="btn btn-secondary btn-sm">Logout</button>
           </>

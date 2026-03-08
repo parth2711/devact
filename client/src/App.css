@@ -720,6 +720,135 @@ h1, h2, h3, h4 {
   margin-bottom: 1rem;
 }
 
+/* ── Repo Visualizer ── */
+.repo-viz-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.repo-viz-section h3 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+
+/* Language Bar */
+.lang-bar-container {
+  margin-bottom: 1.5rem;
+}
+
+.lang-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.lang-bar-segment {
+  transition: var(--transition);
+  min-width: 2px;
+}
+
+.lang-bar-segment:hover {
+  opacity: 0.75;
+}
+
+.lang-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lang-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+
+.lang-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lang-name {
+  font-weight: 500;
+  min-width: 90px;
+}
+
+.lang-pct {
+  color: var(--text-secondary);
+  min-width: 45px;
+  text-align: right;
+  font-size: 0.8rem;
+}
+
+.lang-bytes {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* Repo Viz Cards */
+.repo-viz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.repo-viz-card {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.2rem;
+  transition: var(--transition);
+  color: var(--text-primary);
+}
+
+.repo-viz-card:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  transform: translateX(3px);
+}
+
+.repo-viz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.repo-viz-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  font-family: var(--font-heading);
+}
+
+.repo-viz-lang {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.repo-viz-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+  line-height: 1.35;
+}
+
+.repo-viz-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+}
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .hero h1 {
