@@ -10,10 +10,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // ── MongoDB Connection (cached for serverless) ──
-let isConnected = false;
 const connectDB = async () => {
-  if (isConnected || mongoose.connection.readyState === 1) {
-    isConnected = true;
+  if (mongoose.connection.readyState === 1) {
     return;
   }
   try {
@@ -21,7 +19,6 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
       socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
     });
-    isConnected = true;
   } catch (error) {
     console.error('MongoDB connection error:', error.message);
     throw error;
