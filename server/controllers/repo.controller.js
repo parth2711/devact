@@ -1,5 +1,5 @@
 const { getUserRepos } = require('../services/github.service');
-const { getAggregateLanguages, getRepoDetails, getRepoLanguages } = require('../services/repo.service');
+const { getAggregateLanguages, getRepoDetails, getRepoLanguages, getRepoCommitActivity } = require('../services/repo.service');
 
 // @desc    Get top repos with language info
 // @route   GET /api/repos
@@ -35,7 +35,7 @@ const getLanguages = async (req, res) => {
   }
 };
 
-// @desc    Get details + languages for a specific repo
+// @desc    Get details + languages + activity for a specific repo
 // @route   GET /api/repos/:owner/:repo
 // @access  Private
 const getRepoDetail = async (req, res) => {
@@ -43,12 +43,13 @@ const getRepoDetail = async (req, res) => {
     const { owner, repo } = req.params;
     const token = process.env.GITHUB_TOKEN;
 
-    const [details, languages] = await Promise.all([
+    const [details, languages, activity] = await Promise.all([
       getRepoDetails(owner, repo, token),
       getRepoLanguages(owner, repo, token),
+      getRepoCommitActivity(owner, repo, token),
     ]);
 
-    res.json({ ...details, languages });
+    res.json({ ...details, languages, activity });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

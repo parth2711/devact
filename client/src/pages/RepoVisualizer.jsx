@@ -2,44 +2,29 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell
+} from 'recharts';
 
 const LANG_COLORS = {
-  JavaScript: '#f1e05a',
-  TypeScript: '#3178c6',
-  Python: '#3572A5',
-  Java: '#b07219',
-  'C++': '#f34b7d',
-  C: '#555555',
-  Go: '#00ADD8',
-  Rust: '#dea584',
-  Ruby: '#701516',
-  PHP: '#4F5D95',
-  Swift: '#F05138',
-  Kotlin: '#A97BFF',
-  HTML: '#e34c26',
-  CSS: '#563d7c',
-  Shell: '#89e051',
-  Dart: '#00B4AB',
-  Lua: '#000080',
-  R: '#198CE7',
-  Scala: '#c22d40',
+  JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5',
+  Java: '#b07219', 'C++': '#f34b7d', C: '#555555', Go: '#00ADD8',
+  Rust: '#dea584', Ruby: '#701516', PHP: '#4F5D95', Swift: '#F05138',
+  Kotlin: '#A97BFF', HTML: '#e34c26', CSS: '#563d7c', Shell: '#89e051',
 };
 
 function getColor(lang) {
   return LANG_COLORS[lang] || '#8b5cf6';
 }
 
-function formatBytes(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1048576).toFixed(1)} MB`;
-}
-
 function RepoVisualizer() {
   const { user } = useAuth();
-  const [languages, setLanguages] = useState([]);
   const [repos, setRepos] = useState([]);
+  const [selectedRepo, setSelectedRepo] = useState(null);
+  const [repoDetails, setRepoDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -47,155 +32,162 @@ function RepoVisualizer() {
       setLoading(false);
       return;
     }
-    fetchData();
+    fetchRepos();
   }, [user]);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (selectedRepo) fetchRepoDetails(selectedRepo);
+  }, [selectedRepo]);
+
+  const fetchRepos = async () => {
     try {
-      const [langRes, repoRes] = await Promise.all([
-        API.get('/repos/languages'),
-        API.get('/repos'),
-      ]);
-      setLanguages(langRes.data);
-      setRepos(repoRes.data);
+      const res = await API.get('/repos');
+      setRepos(res.data);
+      if (res.data.length > 0) setSelectedRepo(res.data[0]);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch repo data');
+      setError('failed to fetch repositories');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return <div className="page"><p className="loading">Analyzing repositories...</p></div>;
-  }
+  const fetchRepoDetails = async (repo) => {
+    setDetailsLoading(true);
+    try {
+      const owner = user.githubUsername;
+      const res = await API.get(`/repos/${owner}/${repo.name}`);
+      setRepoDetails({ ...repo, ...res.data });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  if (loading) return <div className="page"><p className="loading">loading repos...</p></div>;
 
   if (!user?.githubUsername) {
     return (
       <div className="page repo-page">
         <div className="empty-state">
-          <h2>Connect GitHub</h2>
-          <p>Set your GitHub username in your profile to visualize your repositories.</p>
-          <Link to="/profile" className="btn btn-primary">Go to Profile</Link>
+          <h2>connect github</h2>
+          <Link to="/profile" className="btn btn-primary">go to profile</Link>
         </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="page repo-page">
-        <div className="empty-state">
-          <h2>Error</h2>
-          <p>{error}</p>
-          <button onClick={fetchData} className="btn btn-primary">Retry</button>
-        </div>
-      </div>
-    );
+  if (error) return <div className="page"><p className="text-muted">{error}</p></div>;
+
+  // prep chart data
+  let activityData = [];
+  if (repoDetails?.activity?.all) {
+    activityData = repoDetails.activity.all.map((count, i) => ({
+      week: `week ${i + 1}`,
+      commits: count
+    }));
   }
 
-  const totalStars = repos.reduce((sum, r) => sum + r.stars, 0);
-  const totalForks = repos.reduce((sum, r) => sum + r.forks, 0);
+  let languageData = [];
+  if (repoDetails?.languages) {
+    const totalBytes = Object.values(repoDetails.languages).reduce((a, b) => a + b, 0);
+    languageData = Object.entries(repoDetails.languages)
+      .map(([name, bytes]) => ({
+        name,
+        value: Math.round((bytes / totalBytes) * 100),
+      }))
+      .filter(l => l.value > 0);
+  }
 
   return (
     <div className="page repo-page">
-      <h2 className="page-title">Repo Visualizer</h2>
+      <h2 className="page-title">repo visualizer</h2>
 
-      {/* Overview Stats */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <span className="stat-value">{repos.length}</span>
-          <span className="stat-label">Repositories</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{languages.length}</span>
-          <span className="stat-label">Languages</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{totalStars}</span>
-          <span className="stat-label">Total Stars</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-value">{totalForks}</span>
-          <span className="stat-label">Total Forks</span>
-        </div>
+      <div className="repo-selector">
+        <select 
+          className="form-input"
+          value={selectedRepo?.id || ''}
+          onChange={(e) => {
+            const r = repos.find(r => r.id === Number(e.target.value));
+            setSelectedRepo(r);
+          }}
+        >
+          {repos.map(r => (
+            <option key={r.id} value={r.id}>{r.name}</option>
+          ))}
+        </select>
       </div>
 
-      <div className="repo-viz-layout">
-        {/* Language Breakdown */}
-        <section className="repo-viz-section">
-          <h3>Language Breakdown</h3>
+      {detailsLoading ? (
+        <p className="loading">crunching data...</p>
+      ) : repoDetails ? (
+        <div className="bento-grid">
+          {/* stats */}
+          <div className="bento-card">
+            <span className="stat-value">{repoDetails.stars}</span>
+            <span className="stat-label">stars</span>
+          </div>
+          <div className="bento-card">
+            <span className="stat-value">{repoDetails.forks}</span>
+            <span className="stat-label">forks</span>
+          </div>
+          <div className="bento-card">
+            <span className="stat-value">{repoDetails.openIssues || 0}</span>
+            <span className="stat-label">open issues</span>
+          </div>
 
-          {/* Language Bar */}
-          {languages.length > 0 && (
-            <div className="lang-bar-container">
-              <div className="lang-bar">
-                {languages.slice(0, 8).map((lang) => (
-                  <div
-                    key={lang.language}
-                    className="lang-bar-segment"
-                    style={{
-                      width: `${lang.percentage}%`,
-                      backgroundColor: getColor(lang.language),
-                    }}
-                    title={`${lang.language}: ${lang.percentage}%`}
+          {/* activity chart */}
+          <div className="bento-card chart-card" style={{ gridColumn: '1 / -1', height: '300px' }}>
+            <h4 className="chart-title">commit activity (last year)</h4>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorCommits" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--accent-primary)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="var(--accent-primary)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="week" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e1e26', border: '1px solid #333', borderRadius: '8px' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Area type="monotone" dataKey="commits" stroke="var(--accent-primary)" fillOpacity={1} fill="url(#colorCommits)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* language chart */}
+          {languageData.length > 0 && (
+            <div className="bento-card chart-card" style={{ height: '300px' }}>
+              <h4 className="chart-title">languages</h4>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={languageData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {languageData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getColor(entry.name)} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value) => `${value}%`}
+                    contentStyle={{ backgroundColor: '#1e1e26', border: '1px solid #333', borderRadius: '8px' }}
                   />
-                ))}
-              </div>
-              <div className="lang-legend">
-                {languages.slice(0, 8).map((lang) => (
-                  <div key={lang.language} className="lang-legend-item">
-                    <span
-                      className="lang-dot"
-                      style={{ backgroundColor: getColor(lang.language) }}
-                    />
-                    <span className="lang-name">{lang.language}</span>
-                    <span className="lang-pct">{lang.percentage}%</span>
-                    <span className="lang-bytes">{formatBytes(lang.bytes)}</span>
-                  </div>
-                ))}
-              </div>
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           )}
-        </section>
-
-        {/* Top Repositories */}
-        <section className="repo-viz-section">
-          <h3>Top Repositories</h3>
-          <div className="repo-viz-list">
-            {repos.slice(0, 8).map((repo) => (
-              <a
-                key={repo.id}
-                href={repo.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="repo-viz-card"
-              >
-                <div className="repo-viz-header">
-                  <span className="repo-viz-name">{repo.name}</span>
-                  <div className="repo-viz-badges">
-                    {repo.language && (
-                      <span
-                        className="repo-viz-lang"
-                        style={{ color: getColor(repo.language) }}
-                      >
-                        {repo.language}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {repo.description && (
-                  <p className="repo-viz-desc">{repo.description}</p>
-                )}
-                <div className="repo-viz-stats">
-                  <span>Stars: {repo.stars}</span>
-                  <span>Forks: {repo.forks}</span>
-                  <span>{new Date(repo.updatedAt).toLocaleDateString()}</span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }

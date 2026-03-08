@@ -505,7 +505,73 @@ h1, h2, h3, h4 {
   margin-bottom: 1.5rem;
 }
 
-/* ── Stats Grid ── */
+/* bento grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.bento-card {
+  background: rgba(30, 30, 38, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bento-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.2);
+}
+
+.bento-card:hover::before {
+  opacity: 1;
+}
+
+/* timeline */
+.timeline {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.timeline-event {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.timeline-event::before {
+  content: '';
+  position: absolute;
+  left: -1.75rem; top: 0.3rem;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 10px var(--accent-primary);
+}
+
+/* stats grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -720,18 +786,52 @@ h1, h2, h3, h4 {
   margin-bottom: 1rem;
 }
 
-/* ── Repo Visualizer ── */
-.repo-viz-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+/* repo visualizer */
+.repo-selector {
+  margin-bottom: 2rem;
+  max-width: 400px;
 }
 
-.repo-viz-section h3 {
-  font-family: var(--font-heading);
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1.2rem;
+.repo-selector select {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 1rem;
+  cursor: pointer;
+  outline: none;
+  transition: var(--transition);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+.repo-selector select:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  align-self: flex-start;
+}
+
+.recharts-tooltip-wrapper {
+  background: transparent !important;
 }
 
 /* Language Bar */

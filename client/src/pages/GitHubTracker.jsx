@@ -68,42 +68,42 @@ function GitHubTracker() {
     <div className="page github-page">
       <h2 className="page-title">GitHub Tracker</h2>
 
-      {/* Stats Overview */}
+      {/* stats overview */}
       {stats && (
-        <div className="stats-grid">
-          <div className="stat-card">
+        <div className="bento-grid">
+          <div className="bento-card">
             <span className="stat-value">{stats.publicRepos}</span>
-            <span className="stat-label">Repositories</span>
+            <span className="stat-label">repositories</span>
           </div>
-          <div className="stat-card">
+          <div className="bento-card">
             <span className="stat-value">{stats.followers}</span>
-            <span className="stat-label">Followers</span>
+            <span className="stat-label">followers</span>
           </div>
-          <div className="stat-card">
+          <div className="bento-card">
             <span className="stat-value">{stats.following}</span>
-            <span className="stat-label">Following</span>
+            <span className="stat-label">following</span>
           </div>
-          <div className="stat-card">
+          <div className="bento-card">
             <span className="stat-value">
               {new Date(stats.createdAt).getFullYear()}
             </span>
-            <span className="stat-label">Joined</span>
+            <span className="stat-label">joined</span>
           </div>
         </div>
       )}
 
       <div className="github-layout">
-        {/* Repositories */}
+        {/* repositories */}
         <section className="github-section">
-          <h3>📁 Repositories</h3>
-          <div className="repo-list">
-            {repos.slice(0, 10).map((repo) => (
+          <h3>📁 repositories</h3>
+          <div className="bento-grid">
+            {repos.slice(0, 8).map((repo) => (
               <a
                 key={repo.id}
                 href={repo.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="repo-card"
+                className="bento-card"
               >
                 <div className="repo-header">
                   <span className="repo-name">{repo.name}</span>
@@ -122,14 +122,14 @@ function GitHubTracker() {
           </div>
         </section>
 
-        {/* Recent Activity */}
+        {/* recent activity */}
         <section className="github-section">
-          <h3>📊 Recent Activity</h3>
-          <div className="activity-list">
-            {activity.slice(0, 15).map((event) => (
-              <div key={event.id} className="activity-item">
-                <span className="activity-icon">{getEventIcon(event.type)}</span>
+          <h3>📊 recent activity</h3>
+          <div className="timeline">
+            {activity.slice(0, 10).map((event) => (
+              <div key={event.id} className="timeline-event">
                 <div className="activity-info">
+                  <span className="activity-icon">{getEventIcon(event.type)}</span>
                   <span className="activity-action">
                     {event.payload.action || event.type.replace('Event', '')}
                   </span>
