@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Menu, X } from 'lucide-react';
 
 function Navbar() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -9,31 +12,43 @@ function Navbar() {
   const handleLogout = () => {
     logout();
     navigate('/');
+    setIsMobileMenuOpen(false);
   };
+
+  const closeMenu = () => setIsMobileMenuOpen(false);
 
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">
+        <Link to="/" onClick={closeMenu}>
           <span className="logo-text">DevAct</span>
         </Link>
       </div>
-      <div className="navbar-links">
+      
+      <button 
+        className="mobile-menu-btn" 
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      <div className={`navbar-links ${isMobileMenuOpen ? 'active' : ''}`}>
         {user ? (
           <>
-            <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
-            <Link to="/github" className={isActive('/github')}>GitHub</Link>
-            <Link to="/cp" className={isActive('/cp')}>CP</Link>
-            <Link to="/repos" className={isActive('/repos')}>Repos</Link>
-            <Link to="/profile" className={isActive('/profile')}>Profile</Link>
-            <button onClick={handleLogout} className="btn btn-secondary btn-sm">Logout</button>
+            <Link to="/dashboard" className={isActive('/dashboard')} onClick={closeMenu}>Dashboard</Link>
+            <Link to="/github" className={isActive('/github')} onClick={closeMenu}>GitHub</Link>
+            <Link to="/cp" className={isActive('/cp')} onClick={closeMenu}>CP</Link>
+            <Link to="/repos" className={isActive('/repos')} onClick={closeMenu}>Repos</Link>
+            <Link to="/profile" className={isActive('/profile')} onClick={closeMenu}>Profile</Link>
+            <button onClick={handleLogout} className="btn btn-secondary btn-sm nav-logout-btn">Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login" className={isActive('/login')}>Login</Link>
-            <Link to="/register" className="btn btn-primary btn-sm">Sign Up</Link>
+            <Link to="/login" className={isActive('/login')} onClick={closeMenu}>Login</Link>
+            <Link to="/register" className="btn btn-primary btn-sm" onClick={closeMenu}>Sign Up</Link>
           </>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
+import { Link as LinkIcon, AlertTriangle, Folder, Star, GitFork, BarChart2, Upload, GitPullRequest, Bug, PlusCircle, Trash2, MessageSquare, Bookmark } from 'lucide-react';
 
 function GitHubTracker() {
   const { user } = useAuth();
@@ -44,7 +45,7 @@ function GitHubTracker() {
     return (
       <div className="page github-page">
         <div className="empty-state">
-          <h2>🔗 Connect GitHub</h2>
+          <h2><LinkIcon size={24} style={{ marginRight: '8px' }}/>Connect GitHub</h2>
           <p>Set your GitHub username in your profile to start tracking.</p>
           <Link to="/profile" className="btn btn-primary">Go to Profile</Link>
         </div>
@@ -56,7 +57,7 @@ function GitHubTracker() {
     return (
       <div className="page github-page">
         <div className="empty-state">
-          <h2>⚠️ Error</h2>
+          <h2><AlertTriangle size={24} style={{ marginRight: '8px', color: 'var(--error-color)' }}/>Error</h2>
           <p>{error}</p>
           <button onClick={fetchGitHubData} className="btn btn-primary">Retry</button>
         </div>
@@ -95,7 +96,7 @@ function GitHubTracker() {
       <div className="github-layout">
         {/* repositories */}
         <section className="github-section">
-          <h3>📁 repositories</h3>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Folder size={20} /> repositories</h3>
           <div className="bento-grid">
             {repos.slice(0, 8).map((repo) => (
               <a
@@ -112,9 +113,9 @@ function GitHubTracker() {
                 {repo.description && (
                   <p className="repo-desc">{repo.description}</p>
                 )}
-                <div className="repo-meta">
-                  <span>⭐ {repo.stars}</span>
-                  <span>🍴 {repo.forks}</span>
+                <div className="repo-meta" style={{ display: 'flex', gap: '12px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Star size={14} /> {repo.stars}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><GitFork size={14} /> {repo.forks}</span>
                   <span>{new Date(repo.updatedAt).toLocaleDateString()}</span>
                 </div>
               </a>
@@ -124,7 +125,7 @@ function GitHubTracker() {
 
         {/* recent activity */}
         <section className="github-section">
-          <h3>📊 recent activity</h3>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><BarChart2 size={20} /> recent activity</h3>
           <div className="timeline">
             {activity.slice(0, 10).map((event) => (
               <div key={event.id} className="timeline-event">
@@ -152,16 +153,16 @@ function GitHubTracker() {
 
 function getEventIcon(type) {
   const icons = {
-    PushEvent: '📤',
-    PullRequestEvent: '🔀',
-    IssuesEvent: '🐛',
-    CreateEvent: '✨',
-    WatchEvent: '⭐',
-    ForkEvent: '🍴',
-    DeleteEvent: '🗑️',
-    IssueCommentEvent: '💬',
+    PushEvent: <Upload size={16} style={{ color: 'var(--accent-secondary)' }} />,
+    PullRequestEvent: <GitPullRequest size={16} style={{ color: '#22c55e' }} />,
+    IssuesEvent: <Bug size={16} style={{ color: '#ef4444' }} />,
+    CreateEvent: <PlusCircle size={16} style={{ color: 'var(--accent-primary)' }} />,
+    WatchEvent: <Star size={16} style={{ color: '#eab308' }} />,
+    ForkEvent: <GitFork size={16} style={{ color: '#8b5cf6' }} />,
+    DeleteEvent: <Trash2 size={16} style={{ color: '#64748b' }} />,
+    IssueCommentEvent: <MessageSquare size={16} style={{ color: '#0ea5e9' }} />,
   };
-  return icons[type] || '📌';
+  return icons[type] || <Bookmark size={16} />;
 }
 
 function timeAgo(dateStr) {

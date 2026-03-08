@@ -63,4 +63,37 @@ const getRepoDetail = async (req, res) => {
   }
 };
 
-module.exports = { getRepos, getLanguages, getRepoDetail };
+const { generateRepoFeedback } = require('../services/ai.service');
+
+// @desc    Generate AI feedback for a repository
+// @route   POST /api/repos/:owner/:repo/feedback
+// @access  Private
+const getRepoFeedback = async (req, res) => {
+  try {
+    const { owner, repo } = req.params;
+    const token = process.env.GITHUB_TOKEN;
+
+    // Fetch the necessary parts to feed to the AI
+    const [details, languages] = await Promise.all([
+      getRepoDetails(owner, repo, token),
+      getRepoLanguages(owner, repo, token),
+    ]);
+
+    let tree = [];
+    try {
+      tree = await getRepoTree(owner, repo, details.defaultBranch, token);
+    } catch (e) {
+      console.error('Failed to fetch tree for AI: ', e.message);
+    }
+
+    // Call Gemini
+    const feedback = await generateRepoFeedback(details, languages, tree);
+
+    res.json({ feedback });
+  } catch (error) {
+    console.error('AI Feedback Error:', error);
+    res.status(500).json({ message: error.message || 'Error generating feedback' });
+  }
+};
+
+module.exports = { getRepos, getLanguages, getRepoDetail, getRepoFeedback };

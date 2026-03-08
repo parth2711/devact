@@ -1,6 +1,6 @@
 {
   "name": "devact",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "A platform for developers to track and aggregate their work alongside competitive programming",
   "main": "server/index.js",
   "scripts": {
@@ -10,7 +10,13 @@
     "install-all": "npm install && cd server && npm install && cd ../client && npm install",
     "vercel-build": "cd client && npm install && npm run build"
   },
-  "keywords": ["developer", "tracker", "competitive-programming", "github", "mern"],
+  "keywords": [
+    "developer",
+    "tracker",
+    "competitive-programming",
+    "github",
+    "mern"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {

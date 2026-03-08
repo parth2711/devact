@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
+import ReactMarkdown from 'react-markdown';
+import { Globe, Lock, FileText, Folder, Star, GitFork, Users, CircleAlert } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
@@ -57,9 +59,13 @@ function FileTree({ tree }) {
     return (
       <div key={node.name} style={{ marginLeft: depth > 0 ? '1.5rem' : '0' }}>
         {entries.map(child => (
-          <div key={child.name} className="tree-node">
-            <span className="tree-icon">{child.type === 'tree' ? '📁' : '📄'}</span>
-            <span className={child.type === 'tree' ? 'tree-folder' : 'tree-file'}>
+          <div key={child.name} className="tree-node" style={{ display: 'flex', alignItems: 'center', marginBottom: '0.3rem' }}>
+            {child.type === 'tree' ? <Folder size={14} style={{ color: 'var(--text-secondary)' }} /> : <FileText size={14} style={{ color: 'var(--text-muted)' }} />}
+            <span style={{ 
+              fontSize: '0.85rem', 
+              marginLeft: '0.3rem', 
+              color: child.type === 'tree' ? 'var(--text-primary)' : 'var(--text-secondary)' 
+            }} className={child.type === 'tree' ? 'tree-folder' : 'tree-file'}>
               {child.name}
             </span>
             {child.type === 'tree' && renderNode(child, depth + 1)}
@@ -83,6 +89,8 @@ function RepoVisualizer() {
   const [repoDetails, setRepoDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -111,6 +119,7 @@ function RepoVisualizer() {
 
   const fetchRepoDetails = async (repo) => {
     setDetailsLoading(true);
+    setAiFeedback(''); // reset feedback on new repo
     try {
       const owner = user.githubUsername;
       const res = await API.get(`/repos/${owner}/${repo.name}`);
@@ -119,6 +128,20 @@ function RepoVisualizer() {
       console.error(err);
     } finally {
       setDetailsLoading(false);
+    }
+  };
+
+  const generateAIFeedback = async () => {
+    setGeneratingAI(true);
+    setAiFeedback('');
+    try {
+      const owner = user.githubUsername;
+      const res = await API.post(`/repos/${owner}/${selectedRepo.name}/feedback`);
+      setAiFeedback(res.data.feedback);
+    } catch (err) {
+      setAiFeedback('❌ failed to generate insights. please check your server logs.');
+    } finally {
+      setGeneratingAI(false);
     }
   };
 
@@ -181,19 +204,23 @@ function RepoVisualizer() {
       ) : repoDetails ? (
         <div className="bento-grid">
           {/* stats */}
-          <div className="bento-card">
+          <div className="bento-card stat-card">
+            <Star size={20} style={{ color: 'var(--accent-secondary)', marginBottom: '0.5rem' }} />
             <span className="stat-value">{repoDetails.stars}</span>
             <span className="stat-label">stars</span>
           </div>
-          <div className="bento-card">
+          <div className="bento-card stat-card">
+            <GitFork size={20} style={{ color: 'var(--accent-secondary)', marginBottom: '0.5rem' }} />
             <span className="stat-value">{repoDetails.forks}</span>
             <span className="stat-label">forks</span>
           </div>
-          <div className="bento-card">
+          <div className="bento-card stat-card">
+             <Users size={20} style={{ color: 'var(--accent-secondary)', marginBottom: '0.5rem' }} />
             <span className="stat-value">{repoDetails.watchers || 0}</span>
             <span className="stat-label">watchers</span>
           </div>
-          <div className="bento-card">
+          <div className="bento-card stat-card">
+            <CircleAlert size={20} style={{ color: 'var(--accent-secondary)', marginBottom: '0.5rem' }} />
             <span className="stat-value">{repoDetails.openIssues || 0}</span>
             <span className="stat-label">open issues</span>
           </div>
@@ -216,10 +243,30 @@ function RepoVisualizer() {
               <div><strong>branch:</strong> {repoDetails.defaultBranch}</div>
               <div><strong>created:</strong> {new Date(repoDetails.createdAt).toLocaleDateString()}</div>
               <div><strong>updated:</strong> {new Date(repoDetails.updatedAt).toLocaleDateString()}</div>
-              <div><strong>visibility:</strong> {repoDetails.isPrivate ? 'private 🔒' : 'public 🌍'}</div>
+              <div><strong>visibility:</strong> {repoDetails.isPrivate ? <span style={{display:'inline-flex', alignItems:'center', gap:'4px'}}>private <Lock size={14} /></span> : <span style={{display:'inline-flex', alignItems:'center', gap:'4px'}}>public <Globe size={14} /></span>}</div>
               <div><a href={repoDetails.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none' }}>view on github ↗</a></div>
             </div>
+
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+              <button 
+                onClick={generateAIFeedback} 
+                disabled={generatingAI}
+                className="ai-btn"
+              >
+                {generatingAI ? '✨ analyzing architecture...' : '✨ generate ai insights'}
+              </button>
+            </div>
           </div>
+
+          {/* ai feedback section */}
+          {aiFeedback && (
+            <div className="bento-card ai-insights-card" style={{ gridColumn: '1 / -1' }}>
+              <h4 className="chart-title ai-title">✨ ai personalized feedback</h4>
+              <div className="ai-markdown">
+                <ReactMarkdown>{aiFeedback}</ReactMarkdown>
+              </div>
+            </div>
+          )}
 
           {/* activity chart */}
           <div className="bento-card chart-card" style={{ gridColumn: '1 / -1', height: '300px' }}>
