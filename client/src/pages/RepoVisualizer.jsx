@@ -14,8 +14,66 @@ const LANG_COLORS = {
   Kotlin: '#A97BFF', HTML: '#e34c26', CSS: '#563d7c', Shell: '#89e051',
 };
 
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 function getColor(lang) {
   return LANG_COLORS[lang] || '#8b5cf6';
+}
+
+function FileTree({ tree }) {
+  if (!tree || tree.length === 0) return <p className="text-muted">no files found.</p>;
+
+  // build nested tree structure
+  const root = { name: 'root', type: 'dir', children: {} };
+  
+  tree.forEach(item => {
+    const parts = item.path.split('/');
+    let current = root;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (!current.children[part]) {
+        current.children[part] = {
+          name: part,
+          type: i === parts.length - 1 ? item.type : 'tree',
+          children: {}
+        };
+      }
+      current = current.children[part];
+    }
+  });
+
+  const renderNode = (node, depth = 0) => {
+    const entries = Object.values(node.children).sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'tree' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    return (
+      <div key={node.name} style={{ marginLeft: depth > 0 ? '1.5rem' : '0' }}>
+        {entries.map(child => (
+          <div key={child.name} className="tree-node">
+            <span className="tree-icon">{child.type === 'tree' ? '📁' : '📄'}</span>
+            <span className={child.type === 'tree' ? 'tree-folder' : 'tree-file'}>
+              {child.name}
+            </span>
+            {child.type === 'tree' && renderNode(child, depth + 1)}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="file-tree-container">
+      {renderNode(root)}
+    </div>
+  );
 }
 
 function RepoVisualizer() {
@@ -132,8 +190,35 @@ function RepoVisualizer() {
             <span className="stat-label">forks</span>
           </div>
           <div className="bento-card">
+            <span className="stat-value">{repoDetails.watchers || 0}</span>
+            <span className="stat-label">watchers</span>
+          </div>
+          <div className="bento-card">
             <span className="stat-value">{repoDetails.openIssues || 0}</span>
             <span className="stat-label">open issues</span>
+          </div>
+
+          {/* repo info details */}
+          <div className="bento-card" style={{ gridColumn: '1 / -1' }}>
+            <h4 className="chart-title" style={{ marginBottom: '0.5rem' }}>repository details</h4>
+            {repoDetails.description && <p className="text-muted" style={{ marginBottom: '1rem' }}>{repoDetails.description}</p>}
+            
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+              {repoDetails.topics?.map(topic => (
+                <span key={topic} style={{ background: 'rgba(139, 92, 246, 0.1)', color: 'var(--accent-primary)', padding: '0.2rem 0.6rem', borderRadius: '12px', fontSize: '0.8rem' }}>
+                  #{topic}
+                </span>
+              ))}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              <div><strong>size:</strong> {formatBytes(repoDetails.size * 1024)}</div>
+              <div><strong>branch:</strong> {repoDetails.defaultBranch}</div>
+              <div><strong>created:</strong> {new Date(repoDetails.createdAt).toLocaleDateString()}</div>
+              <div><strong>updated:</strong> {new Date(repoDetails.updatedAt).toLocaleDateString()}</div>
+              <div><strong>visibility:</strong> {repoDetails.isPrivate ? 'private 🔒' : 'public 🌍'}</div>
+              <div><a href={repoDetails.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'none' }}>view on github ↗</a></div>
+            </div>
           </div>
 
           {/* activity chart */}
@@ -184,6 +269,14 @@ function RepoVisualizer() {
                   />
                 </PieChart>
               </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* file tree structure */}
+          {repoDetails.tree && (
+            <div className="bento-card" style={{ gridColumn: '1 / -1', maxHeight: '400px', overflowY: 'auto' }}>
+              <h4 className="chart-title" style={{ marginBottom: '1rem' }}>repository structure</h4>
+              <FileTree tree={repoDetails.tree} />
             </div>
           )}
         </div>

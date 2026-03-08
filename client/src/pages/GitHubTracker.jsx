@@ -130,10 +130,12 @@ function GitHubTracker() {
               <div key={event.id} className="timeline-event">
                 <div className="activity-info">
                   <span className="activity-icon">{getEventIcon(event.type)}</span>
-                  <span className="activity-action">
-                    {event.payload.action || event.type.replace('Event', '')}
+                  <span className="activity-text">
+                    <span className="activity-action">
+                      {event.payload.action || event.type.replace('Event', '')}
+                    </span>{' '}
+                    <span className="activity-repo">{event.repo}</span>
                   </span>
-                  <span className="activity-repo">{event.repo}</span>
                   <span className="activity-time">
                     {timeAgo(event.createdAt)}
                   </span>

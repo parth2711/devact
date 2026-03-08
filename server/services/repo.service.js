@@ -60,6 +60,16 @@ async function getRepoDetails(owner, repo, token) {
 }
 
 /**
+ * Get the file tree for a repository (up to max depth via recursive api)
+ */
+async function getRepoTree(owner, repo, branch, token) {
+  if (!branch) branch = 'main';
+  // Attempt to fetch recursive tree from github
+  const data = await ghFetch(`/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, token);
+  return data.tree || [];
+}
+
+/**
  * Aggregate language stats across all repos for a user.
  * Returns sorted array: [{ language, bytes, percentage }]
  */
@@ -92,4 +102,4 @@ async function getAggregateLanguages(username, token) {
     .sort((a, b) => b.bytes - a.bytes);
 }
 
-module.exports = { getRepoLanguages, getRepoCommitActivity, getRepoDetails, getAggregateLanguages };
+module.exports = { getRepoLanguages, getRepoCommitActivity, getRepoDetails, getRepoTree, getAggregateLanguages };

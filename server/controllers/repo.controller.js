@@ -1,5 +1,5 @@
 const { getUserRepos } = require('../services/github.service');
-const { getAggregateLanguages, getRepoDetails, getRepoLanguages, getRepoCommitActivity } = require('../services/repo.service');
+const { getAggregateLanguages, getRepoDetails, getRepoLanguages, getRepoCommitActivity, getRepoTree } = require('../services/repo.service');
 
 // @desc    Get top repos with language info
 // @route   GET /api/repos
@@ -35,7 +35,7 @@ const getLanguages = async (req, res) => {
   }
 };
 
-// @desc    Get details + languages + activity for a specific repo
+// @desc    Get details + languages + activity + tree for a specific repo
 // @route   GET /api/repos/:owner/:repo
 // @access  Private
 const getRepoDetail = async (req, res) => {
@@ -49,7 +49,15 @@ const getRepoDetail = async (req, res) => {
       getRepoCommitActivity(owner, repo, token),
     ]);
 
-    res.json({ ...details, languages, activity });
+    // Fetch tree using the default branch from details
+    let tree = [];
+    try {
+      tree = await getRepoTree(owner, repo, details.defaultBranch, token);
+    } catch (e) {
+      console.error('Failed to fetch tree: ', e.message);
+    }
+
+    res.json({ ...details, languages, activity, tree });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

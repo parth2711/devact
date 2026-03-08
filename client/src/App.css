@@ -571,6 +571,33 @@ h1, h2, h3, h4 {
   box-shadow: 0 0 10px var(--accent-primary);
 }
 
+.activity-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.activity-text {
+  color: var(--text-primary);
+}
+
+.activity-action {
+  font-weight: 500;
+  color: var(--accent-primary);
+}
+
+.activity-repo {
+  font-weight: 600;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
 /* stats grid */
 .stats-grid {
   display: grid;
@@ -832,6 +859,34 @@ h1, h2, h3, h4 {
 
 .recharts-tooltip-wrapper {
   background: transparent !important;
+}
+
+/* file tree visualizer */
+.file-tree-container {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.tree-node {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.15rem 0;
+}
+
+.tree-icon {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+}
+
+.tree-folder {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tree-file {
+  color: var(--text-secondary);
 }
 
 /* Language Bar */
