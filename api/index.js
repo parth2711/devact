@@ -2,42 +2,7 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const mongoose = require('mongoose');
-
-// Load env vars (only required locally, Vercel injects them)
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config({ path: path.resolve(__dirname, '../.env') });
-}
-
-// ── MongoDB Connection (cached for serverless) ──
-let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-const connectDB = async () => {
-  if (cached.conn) {
-    return cached.conn;
-  }
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false, // Prevent 10000ms buffering timeouts
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    };
-    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
-  }
-  try {
-    cached.conn = await cached.promise;
-  } catch (error) {
-    cached.promise = null;
-    console.error('MongoDB connection error:', error.message);
-    throw error;
-  }
-  return cached.conn;
-};
+const connectDB = require('../server/config/db');
 
 // ── Import route handlers ──
 const authRoutes = require('../server/routes/auth.routes');
