@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth.routes');
 const githubRoutes = require('./routes/github.routes');
 const cpRoutes = require('./routes/cp.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const repoRoutes = require('./routes/repo.routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/cp', cpRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/repos', repoRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
