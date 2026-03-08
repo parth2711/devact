@@ -10,19 +10,33 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // ── MongoDB Connection (cached for serverless) ──
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) {
-    return;
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false, // Prevent 10000ms buffering timeouts
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    };
+    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((mongoose) => {
+      return mongoose;
+    });
   }
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-    });
+    cached.conn = await cached.promise;
   } catch (error) {
+    cached.promise = null;
     console.error('MongoDB connection error:', error.message);
     throw error;
   }
+  return cached.conn;
 };
 
 // ── Import route handlers ──
