@@ -849,6 +849,72 @@ h1, h2, h3, h4 {
   color: var(--text-muted);
 }
 
+/* ── Dashboard Enhancements ── */
+.dashboard-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+.dashboard-notice {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.dashboard-notice a {
+  color: var(--accent-primary);
+  font-weight: 500;
+}
+
+.dashboard-stats {
+  margin-bottom: 2rem;
+}
+
+.dashboard-card-link {
+  color: var(--text-primary);
+  display: block;
+}
+
+.dashboard-card-link:hover {
+  color: var(--text-primary);
+}
+
+/* LC Progress */
+.lc-progress {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.lc-progress-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.lc-count {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.lc-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lc-easy-text { color: #22c55e; }
+.lc-medium-text { color: #f59e0b; }
+.lc-hard-text { color: #ef4444; }
+
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .hero h1 {
