@@ -24,6 +24,7 @@ function Navbar() {
         {user ? (
           <>
             <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+            <Link to="/github" className={isActive('/github')}>GitHub</Link>
             <Link to="/cp" className={isActive('/cp')}>CP</Link>
             <Link to="/repos" className={isActive('/repos')}>Repos</Link>
             <Link to="/profile" className={isActive('/profile')}>Profile</Link>

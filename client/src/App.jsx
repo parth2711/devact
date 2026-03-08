@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import CPTracker from './pages/CPTracker';
+import GitHubTracker from './pages/GitHubTracker';
 import RepoVisualizer from './pages/RepoVisualizer';
 import './App.css';
 
@@ -36,6 +37,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/github"
+                element={
+                  <ProtectedRoute>
+                    <GitHubTracker />
                   </ProtectedRoute>
                 }
               />
