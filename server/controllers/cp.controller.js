@@ -1,5 +1,7 @@
 const { getUserInfo, getSubmissions, getRatingHistory } = require('../services/codeforces.service');
 const { getLeetCodeStats } = require('../services/leetcode.service');
+const crypto = require('crypto');
+const User = require('../models/User');
 
 // @desc    Get Codeforces user stats
 // @route   GET /api/cp/stats
@@ -56,4 +58,57 @@ const getLeetCode = async (req, res) => {
   }
 };
 
-module.exports = { getCPStats, getCPSubmissions, getLeetCode };
+// @desc    Init Codeforces verification
+// @route   GET /api/cp/codeforces/verify/init
+// @access  Private
+const initCodeforcesVerification = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Generate random token
+    const token = 'devact-verify-' + crypto.randomBytes(8).toString('hex');
+    user.codeforcesVerificationToken = token;
+    await user.save();
+
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Check Codeforces verification
+// @route   POST /api/cp/codeforces/verify/check
+// @access  Private
+const checkCodeforcesVerification = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const handle = user.codeforcesHandle;
+    const token = user.codeforcesVerificationToken;
+
+    if (!handle || !token) {
+      return res.status(400).json({ message: 'Handle or verification token not set' });
+    }
+
+    const userInfo = await getUserInfo(handle);
+    
+    // Fallback: Codeforces userInfo might not have firstName if it's not set
+    if ((userInfo.firstName === token) || (userInfo.lastName === token)) {
+      user.isCodeforcesVerified = true;
+      user.codeforcesVerificationToken = undefined;
+      await user.save();
+      return res.json({ message: 'Codeforces account verified successfully', verified: true });
+    } else {
+      return res.status(400).json({ 
+        message: 'Verification failed. Please ensure you have set your Codeforces First Name or Last Name to the token exactly.',
+        verified: false 
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getCPStats, getCPSubmissions, getLeetCode, initCodeforcesVerification, checkCodeforcesVerification };

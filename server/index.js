@@ -8,6 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
 const connectDB = require('./config/db');
+const session = require('express-session');
+const passport = require('./config/passport');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -24,6 +26,17 @@ app.use(express.json());
 
 // Connect to MongoDB (cached for serverless)
 connectDB();
+
+// Initialize Session and Passport
+app.use(
+  session({
+    secret: process.env.JWT_SECRET || 'devact_session_secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Mount routes
 app.use('/api/auth', authRoutes);
