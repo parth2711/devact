@@ -10,6 +10,12 @@ const githubRoutes = require('../server/routes/github.routes');
 const cpRoutes = require('../server/routes/cp.routes');
 const dashboardRoutes = require('../server/routes/dashboard.routes');
 const repoRoutes = require('../server/routes/repo.routes');
+const syncRoutes = require('../server/routes/sync.routes');
+const snapshotRoutes = require('../server/routes/snapshot.routes');
+const publicRoutes = require('../server/routes/public.routes');
+
+const session = require('express-session');
+const passport = require('../server/config/passport');
 
 // ── Express App ──
 const app = express();
@@ -26,12 +32,26 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Initialize Session and Passport
+app.use(
+  session({
+    secret: process.env.JWT_SECRET || 'devact_session_secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/cp', cpRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/repos', repoRoutes);
+app.use('/api/sync', syncRoutes);
+app.use('/api/snapshots', snapshotRoutes);
+app.use('/api/u', publicRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
