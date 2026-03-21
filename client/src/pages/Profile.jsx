@@ -11,6 +11,10 @@ function Profile() {
     githubUsername: user?.githubUsername || '',
     codeforcesHandle: user?.codeforcesHandle || '',
     leetcodeUsername: user?.leetcodeUsername || '',
+    wakatimeApiKey: undefined,
+    stackoverflowId: user?.stackoverflowId || '',
+    npmPackages: user?.npmPackages ? user.npmPackages.join(', ') : '',
+    pypiPackages: user?.pypiPackages ? user.pypiPackages.join(', ') : '',
   });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [saving, setSaving] = useState(false);
@@ -29,8 +33,38 @@ function Profile() {
     e.preventDefault();
     setSaving(true);
     setStatus({ type: '', message: '' });
+
+    const payload = { ...formData };
+
+    if (payload.wakatimeApiKey === undefined) {
+      delete payload.wakatimeApiKey;
+    }
+
+    // Convert comma-separated strings to arrays and trim
+    const parseList = (str) => str.split(',').map(s => s.trim()).filter(s => s);
+    payload.npmPackages = parseList(formData.npmPackages);
+    payload.pypiPackages = parseList(formData.pypiPackages);
+
+    // Regex validation
+    const npmRegex = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+    if (payload.npmPackages.some(pkg => !npmRegex.test(pkg))) {
+      setStatus({ type: 'error', message: 'One or more npm packages have an invalid format.' });
+      setSaving(false); return;
+    }
+    
+    const pypiRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
+    if (payload.pypiPackages.some(pkg => !pypiRegex.test(pkg))) {
+      setStatus({ type: 'error', message: 'One or more PyPI packages have an invalid format.' });
+      setSaving(false); return;
+    }
+
+    if (payload.npmPackages.length > 10 || payload.pypiPackages.length > 10) {
+      setStatus({ type: 'error', message: 'You can track a maximum of 10 packages per platform.' });
+      setSaving(false); return;
+    }
+
     try {
-      await updateProfile(formData);
+      await updateProfile(payload);
       setStatus({ type: 'success', message: 'Profile updated successfully!' });
     } catch (err) {
       setStatus({ type: 'error', message: err.response?.data?.message || 'Update failed' });
@@ -193,6 +227,58 @@ function Profile() {
                 name="leetcodeUsername"
                 placeholder="e.g. lee215"
                 value={formData.leetcodeUsername}
+                onChange={handleChange}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="wakatimeApiKey">WakaTime API Key</label>
+              <input
+                id="wakatimeApiKey"
+                type="password"
+                name="wakatimeApiKey"
+                placeholder={user?.wakatimeConfiguredAt ? 'Key is configured (hidden). Type to replace.' : 'Paste your Secret API Key'}
+                autoComplete="new-password"
+                value={formData.wakatimeApiKey === undefined ? '' : formData.wakatimeApiKey}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="stackoverflowId">Stack Overflow User ID</label>
+              <input
+                id="stackoverflowId"
+                type="text"
+                name="stackoverflowId"
+                placeholder="e.g. 22656"
+                value={formData.stackoverflowId}
+                onChange={handleChange}
+              />
+              <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                Find this in your Stack Overflow profile URL (e.g., stackoverflow.com/users/<strong>22656</strong>/jon-skeet)
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="npmPackages">npm Packages (max 10, comma-separated)</label>
+              <input
+                id="npmPackages"
+                type="text"
+                name="npmPackages"
+                placeholder="e.g. react, lodash, express"
+                value={formData.npmPackages}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="pypiPackages">PyPI Packages (max 10, comma-separated)</label>
+              <input
+                id="pypiPackages"
+                type="text"
+                name="pypiPackages"
+                placeholder="e.g. requests, numpy, django"
+                value={formData.pypiPackages}
                 onChange={handleChange}
               />
             </div>

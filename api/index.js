@@ -2,6 +2,13 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+
+// Startup Config Check for WakaTime encryption
+if (!process.env.ENCRYPTION_KEY || Buffer.from(process.env.ENCRYPTION_KEY).length !== 32) {
+  console.error('[Config] ENCRYPTION_KEY must be exactly 32 bytes for AES-256-CBC');
+  process.exit(1);
+}
+
 const connectDB = require('../server/config/db');
 
 // ── Import route handlers ──

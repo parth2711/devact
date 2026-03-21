@@ -74,7 +74,10 @@ const getMe = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { name, githubUsername, codeforcesHandle, leetcodeUsername, username, isPublicProfile } = req.body;
+    const { 
+      name, githubUsername, codeforcesHandle, leetcodeUsername, username, isPublicProfile,
+      wakatimeApiKey, stackoverflowId, npmPackages, pypiPackages
+    } = req.body;
 
     // Guard: can't enable public profile without a username
     if (isPublicProfile === true) {
@@ -98,6 +101,22 @@ const updateProfile = async (req, res) => {
     } else if (username === '') {
       updateQuery.$unset.username = 1;
       updateQuery.$set.isPublicProfile = false; // Turn off public if username is cleared
+    }
+
+    if (stackoverflowId !== undefined) updateQuery.$set.stackoverflowId = stackoverflowId;
+    if (npmPackages !== undefined) updateQuery.$set.npmPackages = npmPackages;
+    if (pypiPackages !== undefined) updateQuery.$set.pypiPackages = pypiPackages;
+
+    // Handle WakaTime Key explicitly to trigger Document pre('save') encryption middleware
+    if (wakatimeApiKey !== undefined) {
+      const doc = await User.findById(req.user._id);
+      if (wakatimeApiKey === '') {
+        doc.wakatimeApiKey = undefined;
+        doc.wakatimeConfiguredAt = null;
+      } else {
+        doc.wakatimeApiKey = wakatimeApiKey;
+      }
+      await doc.save();
     }
 
     if (isPublicProfile !== undefined && username !== '') {

@@ -20,6 +20,9 @@ const getDashboardData = async (req, res) => {
         github: null,
         codeforces: null,
         leetcode: null,
+        wakatime: null,
+        stackoverflow: null,
+        packages: null,
         lastSyncedAt: syncData.lastFullSync,
       };
 
@@ -52,6 +55,18 @@ const getDashboardData = async (req, res) => {
           hard: syncData.leetcode.stats.solved?.hard || 0,
           ranking: syncData.leetcode.stats.ranking || 0,
         };
+      }
+
+      if (syncData.wakatime?.totalSeconds > 0) {
+        data.wakatime = syncData.wakatime;
+      }
+
+      if (syncData.stackoverflow?.reputation > 0) {
+        data.stackoverflow = syncData.stackoverflow;
+      }
+
+      if (syncData.packages?.npm?.length > 0 || syncData.packages?.pypi?.length > 0) {
+        data.packages = syncData.packages;
       }
 
       return res.json(data);
@@ -113,9 +128,20 @@ const getDashboardData = async (req, res) => {
       );
     }
 
+    // New platforms live fetch (optional, but syncUserData handles it anyway)
+    data.wakatime = null;
+    data.stackoverflow = null;
+    data.packages = null;
+
     // Initial sync context — await it so Vercel keeps the lambda alive
     try {
-      await syncUserData(user._id);
+      const updatedSync = await syncUserData(user._id);
+      if (updatedSync) {
+        if (updatedSync.wakatime?.totalSeconds > 0) data.wakatime = updatedSync.wakatime;
+        if (updatedSync.stackoverflow?.reputation > 0) data.stackoverflow = updatedSync.stackoverflow;
+        if (updatedSync.packages?.npm?.length > 0 || updatedSync.packages?.pypi?.length > 0) data.packages = updatedSync.packages;
+        data.lastSyncedAt = updatedSync.lastFullSync;
+      }
     } catch (err) {
       console.error('[Dashboard] Initial sync failed:', err.message);
     }

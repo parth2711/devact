@@ -4,6 +4,9 @@ const DailySnapshot = require('../models/DailySnapshot');
 const { getUserStats, getUserRepos, getUserActivity } = require('./github.service');
 const { getUserInfo, getSubmissions, getRatingHistory } = require('./codeforces.service');
 const { getLeetCodeStats } = require('./leetcode.service');
+const { getWakatimeStats } = require('./wakatime.service');
+const { getStackOverflowStats } = require('./stackoverflow.service');
+const { getPackageStats } = require('./packages.service');
 
 /**
  * Sync all external API data for a single user and store in MongoDB.
@@ -58,6 +61,43 @@ async function syncUserData(userId) {
     } catch (err) {
       console.error(`[Sync] LeetCode failed for ${user.leetcodeUsername}:`, err.message);
     }
+  }
+
+  // --- New V2.1.0 Platforms ---
+  const wakatimeKey = user.getDecryptedWakatimeKey ? user.getDecryptedWakatimeKey() : null;
+  const soId = user.stackoverflowId;
+  const npmList = user.npmPackages || [];
+  const pypiList = user.pypiPackages || [];
+
+  const wakatimePromise = wakatimeKey ? getWakatimeStats(wakatimeKey) : Promise.resolve(undefined);
+  const soPromise = soId ? getStackOverflowStats(soId) : Promise.resolve(undefined);
+  const packagesPromise = (npmList.length > 0 || pypiList.length > 0) 
+    ? getPackageStats(npmList, pypiList) 
+    : Promise.resolve(undefined);
+
+  const newPlatforms = await Promise.allSettled([wakatimePromise, soPromise, packagesPromise]);
+
+  newPlatforms.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      const platformName = ['WakaTime', 'StackOverflow', 'Packages'][i];
+      console.error(`[Sync] ${platformName} failed:`, r.reason?.message || r.reason);
+    }
+  });
+
+  const [wakatimeRes, soRes, pkgRes] = newPlatforms;
+
+  if (wakatimeRes.status === 'fulfilled' && wakatimeRes.value !== undefined) {
+    if (wakatimeRes.value !== null) {
+      syncData.wakatime = { ...wakatimeRes.value, lastSyncedAt: now };
+    }
+  }
+
+  if (soRes.status === 'fulfilled' && soRes.value !== undefined && soRes.value !== null) {
+    syncData.stackoverflow = { ...soRes.value, lastSyncedAt: now };
+  }
+
+  if (pkgRes.status === 'fulfilled' && pkgRes.value !== undefined && pkgRes.value !== null) {
+    syncData.packages = { ...pkgRes.value, lastSyncedAt: now };
   }
 
   syncData.lastFullSync = now;

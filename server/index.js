@@ -7,6 +7,12 @@ const dotenv = require('dotenv');
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
+// Startup Config Check for WakaTime encryption
+if (!process.env.ENCRYPTION_KEY || Buffer.from(process.env.ENCRYPTION_KEY).length !== 32) {
+  console.error('[Config] ENCRYPTION_KEY must be exactly 32 bytes for AES-256-CBC');
+  process.exit(1);
+}
+
 const connectDB = require('./config/db');
 const session = require('express-session');
 const passport = require('./config/passport');
@@ -77,3 +83,4 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
 }
 
 module.exports = app;
+// Trigger restart

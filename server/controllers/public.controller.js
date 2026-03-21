@@ -39,6 +39,9 @@ const getPublicProfile = async (req, res) => {
       github: null,
       codeforces: null,
       leetcode: null,
+      wakatime: null,
+      stackoverflow: null,
+      packages: null,
       snapshots,
     };
 
@@ -71,6 +74,18 @@ const getPublicProfile = async (req, res) => {
         hard: syncData.leetcode.stats.solved?.hard || 0,
         ranking: syncData.leetcode.stats.ranking || 0,
       };
+    }
+
+    if (syncData?.wakatime?.totalSeconds > 0) {
+      profile.wakatime = syncData.wakatime;
+    }
+
+    if (syncData?.stackoverflow?.reputation > 0) {
+      profile.stackoverflow = syncData.stackoverflow;
+    }
+
+    if (syncData?.packages?.npm?.length > 0 || syncData?.packages?.pypi?.length > 0) {
+      profile.packages = syncData.packages;
     }
 
     res.json(profile);

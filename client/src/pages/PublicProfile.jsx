@@ -79,6 +79,13 @@ function PublicProfile() {
         </div>
       </header>
 
+      {/* WakaTime Headline Stat */}
+      {profile.wakatime?.totalSeconds > 0 && (
+        <div style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          ⏱️ {Math.round(profile.wakatime.totalSeconds / 3600)} hrs coded this week
+        </div>
+      )}
+
       {/* Stats */}
       <div className="stats-grid dashboard-stats">
         {profile.github && (
@@ -180,6 +187,84 @@ function PublicProfile() {
           </div>
         </div>
       )}
+
+      {/* Integrations Grid */}
+      <div className="dashboard-grid" style={{ marginTop: '1.5rem' }}>
+        {/* WakaTime Integration Card */}
+        {profile.wakatime?.totalSeconds > 0 && (
+          <div className="dashboard-card" style={{ padding: '1.5rem' }}>
+            <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              ⏱️ WakaTime Languages
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {profile.wakatime.languages?.map((lang) => (
+                <div key={lang.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                  <span>{lang.name}</span>
+                  <span style={{ fontWeight: 600 }}>{lang.percent}% ({Math.round(lang.total_seconds / 3600)}h)</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Stack Overflow Integration Card */}
+        {profile.stackoverflow?.reputation > 0 && (
+          <div className="dashboard-card" style={{ padding: '1.5rem' }}>
+            <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="20" height="20" viewBox="0 0 120 120" fill="currentColor" color="#f58025"><path d="M84.4 93.8V70.6h7.7v30.9H22.6V70.6h7.7v23.2z"/><path d="M38.8 68.4l37.8 7.9 1.6-7.6-37.8-7.9-1.6 7.6zm5-18l35 16.3 3.2-7-35-16.4-3.2 7.1zm9.7-17.2l29.7 24.7 4.9-5.9-29.7-24.7-4.9 5.9zm19.2-18.3l-6.2 4.6 23 31 6.2-4.6-23-31zM38 86h38.6v-7.7H38V86z"/></svg>
+              Stack Overflow
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1rem' }}>
+              <span style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0f172a' }}>{profile.stackoverflow.reputation.toLocaleString()}</span>
+              <span style={{ color: '#64748b', fontSize: '0.875rem' }}>reputation</span>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              {profile.stackoverflow.badges.gold > 0 && <span style={{ color: '#f1b600', fontWeight: 600 }}>● {profile.stackoverflow.badges.gold}</span>}
+              {profile.stackoverflow.badges.silver > 0 && <span style={{ color: '#b4b8bc', fontWeight: 600 }}>● {profile.stackoverflow.badges.silver}</span>}
+              {profile.stackoverflow.badges.bronze > 0 && <span style={{ color: '#d1a684', fontWeight: 600 }}>● {profile.stackoverflow.badges.bronze}</span>}
+            </div>
+            {profile.stackoverflow.topAnswers?.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <h4 style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase' }}>Top Answers</h4>
+                {profile.stackoverflow.topAnswers.map((ans, idx) => (
+                  <a key={idx} href={ans.link} target="_blank" rel="noreferrer" style={{ fontSize: '0.875rem', color: '#3b82f6', textDecoration: 'none', display: 'flex', gap: '0.5rem' }}>
+                    <span style={{ color: '#10b981', fontWeight: 600 }}>+{ans.score}</span> {ans.title}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Packages Integration Card */}
+        {(profile.packages?.npm?.length > 0 || profile.packages?.pypi?.length > 0) && (
+           <div className="dashboard-card" style={{ padding: '1.5rem' }}>
+             <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+               📦 Open Source Impact
+             </h3>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+               {profile.packages.npm?.map(pkg => (
+                 <div key={`npm-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                     <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#cb3837', color: 'white', fontWeight: 'bold' }}>npm</span>
+                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>{pkg.name}</span>
+                   </div>
+                   <span style={{ fontSize: '0.875rem', color: '#64748b' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
+                 </div>
+               ))}
+               {profile.packages.pypi?.map(pkg => (
+                 <div key={`pypi-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                     <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#3776ab', color: 'white', fontWeight: 'bold' }}>PyPI</span>
+                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>{pkg.name}</span>
+                   </div>
+                   <span style={{ fontSize: '0.875rem', color: '#64748b' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
+                 </div>
+               ))}
+             </div>
+           </div>
+        )}
+      </div>
     </div>
   );
 }
