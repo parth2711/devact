@@ -23,13 +23,14 @@ const triggerSync = async (req, res) => {
       }
     }
 
-    // Run sync asynchronously — respond immediately, sync in background
-    res.json({ message: 'Sync started', syncing: true });
-
+    // Await sync before responding. Vercel freezes background execution
+    // the moment res.json() is called, so fire-and-forget will fail.
     try {
       await syncUserData(userId);
+      res.json({ message: 'Sync complete', syncing: false });
     } catch (err) {
       console.error(`[Sync] Manual sync failed for ${userId}:`, err.message);
+      res.status(500).json({ message: 'Background sync failed.' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

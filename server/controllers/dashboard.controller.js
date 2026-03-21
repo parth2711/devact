@@ -113,14 +113,14 @@ const getDashboardData = async (req, res) => {
       );
     }
 
-    res.json(data);
-
-    // Initial sync in background — await it so Vercel keeps the lambda alive
+    // Initial sync context — await it so Vercel keeps the lambda alive
     try {
       await syncUserData(user._id);
     } catch (err) {
       console.error('[Dashboard] Initial sync failed:', err.message);
     }
+
+    res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
