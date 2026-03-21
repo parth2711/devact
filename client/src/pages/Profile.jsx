@@ -6,6 +6,8 @@ function Profile() {
   const { user, updateProfile } = useAuth();
   const [formData, setFormData] = useState({
     name: user?.name || '',
+    username: user?.username || '',
+    isPublicProfile: user?.isPublicProfile || false,
     githubUsername: user?.githubUsername || '',
     codeforcesHandle: user?.codeforcesHandle || '',
     leetcodeUsername: user?.leetcodeUsername || '',
@@ -93,6 +95,45 @@ function Profile() {
                 required
               />
             </div>
+          </div>
+
+          <div className="form-section">
+            <h3>Public Profile</h3>
+            <div className="form-group">
+              <label htmlFor="username">Username (for public URL)</label>
+              <input
+                id="username"
+                type="text"
+                name="username"
+                placeholder="e.g. parth2711"
+                value={formData.username}
+                onChange={handleChange}
+                pattern="[a-z0-9_]{3,20}"
+                title="3-20 lowercase letters, numbers, or underscores"
+              />
+              {formData.username && (
+                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                  Your profile URL: <strong>{window.location.origin}/u/{formData.username}</strong>
+                </p>
+              )}
+            </div>
+            <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <input
+                id="isPublicProfile"
+                type="checkbox"
+                name="isPublicProfile"
+                checked={formData.isPublicProfile}
+                onChange={(e) => setFormData({ ...formData, isPublicProfile: e.target.checked })}
+                disabled={!formData.username}
+                style={{ width: 'auto' }}
+              />
+              <label htmlFor="isPublicProfile" style={{ margin: 0, cursor: formData.username ? 'pointer' : 'not-allowed', color: formData.username ? '#0f172a' : '#94a3b8' }}>
+                Make my profile public
+              </label>
+            </div>
+            {!formData.username && formData.isPublicProfile === false && (
+              <p style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Set a username above to enable public profiles.</p>
+            )}
           </div>
 
           <div className="form-section">

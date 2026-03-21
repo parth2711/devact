@@ -17,6 +17,10 @@ const githubRoutes = require('./routes/github.routes');
 const cpRoutes = require('./routes/cp.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const repoRoutes = require('./routes/repo.routes');
+const syncRoutes = require('./routes/sync.routes');
+const snapshotRoutes = require('./routes/snapshot.routes');
+const publicRoutes = require('./routes/public.routes');
+const { startSyncCron } = require('./cron/sync.cron');
 
 const app = express();
 
@@ -44,6 +48,9 @@ app.use('/api/github', githubRoutes);
 app.use('/api/cp', cpRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/repos', repoRoutes);
+app.use('/api/sync', syncRoutes);
+app.use('/api/snapshots', snapshotRoutes);
+app.use('/api/u', publicRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -64,6 +71,8 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    // Start background sync cron (only on persistent hosting, not Vercel)
+    startSyncCron();
   });
 }
 

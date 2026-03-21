@@ -61,6 +61,21 @@ const userSchema = new mongoose.Schema(
     codeforcesVerificationToken: {
       type: String,
     },
+    // Optional — only required when enabling public profile.
+    // sparse: true allows multiple null values with unique constraint.
+    // NOTE: Verify behavior on your MongoDB Atlas version (7.x+ is fine).
+    username: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+      match: [/^[a-z0-9_]{3,20}$/, 'Username must be 3-20 lowercase alphanumeric characters or underscores'],
+    },
+    isPublicProfile: {
+      type: Boolean,
+      default: false,
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

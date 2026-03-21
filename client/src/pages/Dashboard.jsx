@@ -2,36 +2,119 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
-import { Github, Code, BarChart2 } from 'lucide-react';
+import { Github, Code, BarChart2, RefreshCw } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 function Dashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState(null);
+  const [snapshots, setSnapshots] = useState([]);
 
   useEffect(() => {
     fetchDashboard();
+    fetchSyncStatus();
+    fetchSnapshots();
   }, []);
+
+  // Poll for sync completion if data shows syncing state
+  useEffect(() => {
+    if (data?.syncing) {
+      const interval = setInterval(async () => {
+        const status = await API.get('/sync/status').then(r => r.data).catch(() => null);
+        if (status?.synced) {
+          clearInterval(interval);
+          fetchDashboard();
+          fetchSyncStatus();
+          fetchSnapshots();
+        }
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [data?.syncing]);
 
   const fetchDashboard = async () => {
     try {
       const res = await API.get('/dashboard');
       setData(res.data);
     } catch (err) {
-      // silently fail — show cards without data
+      // silently fail
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchSyncStatus = async () => {
+    try {
+      const res = await API.get('/sync/status');
+      setSyncStatus(res.data);
+    } catch (err) {}
+  };
+
+  const fetchSnapshots = async () => {
+    try {
+      const res = await API.get('/snapshots?days=30');
+      setSnapshots(res.data.snapshots || []);
+    } catch (err) {}
+  };
+
+  const handleSyncNow = async () => {
+    setSyncing(true);
+    try {
+      await API.post('/sync/now');
+      // Poll for completion
+      setTimeout(async () => {
+        await fetchDashboard();
+        await fetchSyncStatus();
+        await fetchSnapshots();
+        setSyncing(false);
+      }, 5000);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Sync failed';
+      alert(msg);
+      setSyncing(false);
+    }
+  };
+
+  const formatSyncTime = (dateStr) => {
+    if (!dateStr) return 'Never';
+    const d = new Date(dateStr);
+    return d.toLocaleString();
+  };
+
   const hasAny = user?.githubUsername || user?.codeforcesHandle || user?.leetcodeUsername;
+  const hasTrendData = snapshots.length > 1;
 
   return (
     <div className="page dashboard-page">
       <header className="dashboard-header">
-        <h2>Welcome back, {user?.name}</h2>
-        <p className="dashboard-subtitle">Your developer activity at a glance</p>
+        <div>
+          <h2>Welcome back, {user?.name}</h2>
+          <p className="dashboard-subtitle">Your developer activity at a glance</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+            Last synced: {formatSyncTime(syncStatus?.lastFullSync || data?.lastSyncedAt)}
+          </span>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleSyncNow}
+            disabled={syncing}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <RefreshCw size={14} className={syncing ? 'spinning' : ''} />
+            {syncing ? 'Syncing...' : 'Sync Now'}
+          </button>
+        </div>
       </header>
+
+      {data?.syncing && (
+        <div className="dashboard-notice" style={{ background: '#eff6ff', borderColor: '#3b82f6' }}>
+          <p style={{ color: '#1e40af' }}>⏳ Initial sync in progress. Your data will appear shortly...</p>
+        </div>
+      )}
 
       {!hasAny && (
         <div className="dashboard-notice">
@@ -40,7 +123,7 @@ function Dashboard() {
       )}
 
       {/* Quick Stats Row */}
-      {data && (
+      {data && !data.syncing && (
         <div className="stats-grid dashboard-stats">
           {data.github && (
             <>
@@ -70,6 +153,57 @@ function Dashboard() {
               <span className="stat-label">LC Solved</span>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Trend Charts */}
+      {hasTrendData && (
+        <div className="dashboard-card" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>📈 Trends (Last 30 Days)</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+            {snapshots[0]?.codeforces?.rating > 0 && (
+              <div>
+                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>Codeforces Rating</h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={snapshots}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="codeforces.rating" stroke="#3b82f6" strokeWidth={2} dot={false} name="Rating" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            {snapshots[0]?.leetcode?.totalSolved > 0 && (
+              <div>
+                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>LeetCode Solved</h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={snapshots}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="leetcode.totalSolved" stroke="#10b981" strokeWidth={2} dot={false} name="Total Solved" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            {snapshots[0]?.github?.stars > 0 && (
+              <div>
+                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>GitHub Stars</h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={snapshots}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="github.stars" stroke="#f59e0b" strokeWidth={2} dot={false} name="Stars" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

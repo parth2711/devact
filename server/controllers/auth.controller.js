@@ -74,7 +74,16 @@ const getMe = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { name, githubUsername, codeforcesHandle, leetcodeUsername } = req.body;
+    const { name, githubUsername, codeforcesHandle, leetcodeUsername, username, isPublicProfile } = req.body;
+
+    // Guard: can't enable public profile without a username
+    if (isPublicProfile === true) {
+      const currentUser = await User.findById(req.user._id);
+      const effectiveUsername = username || currentUser.username;
+      if (!effectiveUsername) {
+        return res.status(400).json({ message: 'Please set a username before enabling your public profile.' });
+      }
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -83,12 +92,18 @@ const updateProfile = async (req, res) => {
         ...(githubUsername !== undefined && { githubUsername }),
         ...(codeforcesHandle !== undefined && { codeforcesHandle }),
         ...(leetcodeUsername !== undefined && { leetcodeUsername }),
+        ...(username !== undefined && { username }),
+        ...(isPublicProfile !== undefined && { isPublicProfile }),
       },
       { new: true, runValidators: true }
     );
 
     res.json(user);
   } catch (error) {
+    // Handle duplicate username error
+    if (error.code === 11000 && error.keyPattern?.username) {
+      return res.status(400).json({ message: 'This username is already taken.' });
+    }
     res.status(500).json({ message: error.message });
   }
 };

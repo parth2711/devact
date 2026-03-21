@@ -1,6 +1,7 @@
+const SyncData = require('../models/SyncData');
 const { getUserRepos, getUserActivity, getUserStats } = require('../services/github.service');
 
-// @desc    Get GitHub repositories for authenticated user
+// @desc    Get GitHub repositories (from cache)
 // @route   GET /api/github/repos
 // @access  Private
 const getGithubRepos = async (req, res) => {
@@ -10,6 +11,12 @@ const getGithubRepos = async (req, res) => {
       return res.status(400).json({ message: 'GitHub username not set. Update your profile first.' });
     }
 
+    const syncData = await SyncData.findOne({ userId: req.user._id });
+    if (syncData?.github?.repos) {
+      return res.json(syncData.github.repos);
+    }
+
+    // Fallback to live
     const repos = await getUserRepos(username, process.env.GITHUB_TOKEN);
     res.json(repos);
   } catch (error) {
@@ -17,7 +24,7 @@ const getGithubRepos = async (req, res) => {
   }
 };
 
-// @desc    Get recent GitHub activity for authenticated user
+// @desc    Get recent GitHub activity (from cache)
 // @route   GET /api/github/activity
 // @access  Private
 const getGithubActivity = async (req, res) => {
@@ -27,6 +34,11 @@ const getGithubActivity = async (req, res) => {
       return res.status(400).json({ message: 'GitHub username not set. Update your profile first.' });
     }
 
+    const syncData = await SyncData.findOne({ userId: req.user._id });
+    if (syncData?.github?.activity) {
+      return res.json(syncData.github.activity);
+    }
+
     const activity = await getUserActivity(username, process.env.GITHUB_TOKEN);
     res.json(activity);
   } catch (error) {
@@ -34,7 +46,7 @@ const getGithubActivity = async (req, res) => {
   }
 };
 
-// @desc    Get GitHub profile stats for authenticated user
+// @desc    Get GitHub profile stats (from cache)
 // @route   GET /api/github/stats
 // @access  Private
 const getGithubStats = async (req, res) => {
@@ -42,6 +54,11 @@ const getGithubStats = async (req, res) => {
     const username = req.user.githubUsername;
     if (!username) {
       return res.status(400).json({ message: 'GitHub username not set. Update your profile first.' });
+    }
+
+    const syncData = await SyncData.findOne({ userId: req.user._id });
+    if (syncData?.github?.stats) {
+      return res.json(syncData.github.stats);
     }
 
     const stats = await getUserStats(username, process.env.GITHUB_TOKEN);

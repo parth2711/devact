@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import CPTracker from './pages/CPTracker';
 import GitHubTracker from './pages/GitHubTracker';
 import RepoVisualizer from './pages/RepoVisualizer';
+import PublicProfile from './pages/PublicProfile';
 import './App.css';
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/u/:username" element={<PublicProfile />} />
             </Routes>
           </main>
           <Footer />

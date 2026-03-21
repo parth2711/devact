@@ -105,6 +105,12 @@ npm run dev
 
 ---
 
+## Known Limitations
+
+- **Handle Changes**: DevAct's daily snapshot tracking relies on a background sync engine that maps external data to an internal user ID. If you change your GitHub username or Codeforces handle and update your profile, the sync engine will start pulling data for the new handle, but old `DailySnapshot` entries will remain. This may cause a temporary discontinuity in your trend charts.
+
+---
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

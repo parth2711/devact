@@ -1,18 +1,66 @@
+const SyncData = require('../models/SyncData');
 const { getUserStats, getUserRepos } = require('../services/github.service');
 const { getUserInfo } = require('../services/codeforces.service');
 const { getLeetCodeStats } = require('../services/leetcode.service');
+const { syncUserData } = require('../services/sync.service');
 
-// @desc    Get aggregated dashboard data
+// @desc    Get aggregated dashboard data (from cache, fallback to live)
 // @route   GET /api/dashboard
 // @access  Private
 const getDashboardData = async (req, res) => {
   try {
     const user = req.user;
-    const data = { github: null, codeforces: null, leetcode: null };
 
+    // Try cache first
+    const syncData = await SyncData.findOne({ userId: user._id });
+
+    if (syncData && syncData.lastFullSync) {
+      // Serve from cache
+      const data = {
+        github: null,
+        codeforces: null,
+        leetcode: null,
+        lastSyncedAt: syncData.lastFullSync,
+      };
+
+      if (syncData.github?.stats) {
+        const totalStars = (syncData.github.repos || []).reduce((sum, r) => sum + (r.stars || 0), 0);
+        data.github = {
+          username: syncData.github.stats.login,
+          repos: syncData.github.stats.publicRepos,
+          followers: syncData.github.stats.followers,
+          totalStars,
+          topLanguages: [...new Set((syncData.github.repos || []).map((r) => r.language).filter(Boolean))].slice(0, 5),
+        };
+      }
+
+      if (syncData.codeforces?.userInfo) {
+        data.codeforces = {
+          handle: syncData.codeforces.userInfo.handle,
+          rating: syncData.codeforces.userInfo.rating,
+          maxRating: syncData.codeforces.userInfo.maxRating,
+          rank: syncData.codeforces.userInfo.rank,
+        };
+      }
+
+      if (syncData.leetcode?.stats) {
+        data.leetcode = {
+          username: syncData.leetcode.stats.username,
+          totalSolved: syncData.leetcode.stats.solved?.all || 0,
+          easy: syncData.leetcode.stats.solved?.easy || 0,
+          medium: syncData.leetcode.stats.solved?.medium || 0,
+          hard: syncData.leetcode.stats.solved?.hard || 0,
+          ranking: syncData.leetcode.stats.ranking || 0,
+        };
+      }
+
+      return res.json(data);
+    }
+
+    // No cache — try live fetch as fallback
+    const data = { github: null, codeforces: null, leetcode: null, syncing: true };
     const promises = [];
 
-    // GitHub stats
     if (user.githubUsername) {
       promises.push(
         Promise.all([
@@ -33,7 +81,6 @@ const getDashboardData = async (req, res) => {
       );
     }
 
-    // Codeforces stats
     if (user.codeforcesHandle) {
       promises.push(
         getUserInfo(user.codeforcesHandle)
@@ -49,7 +96,6 @@ const getDashboardData = async (req, res) => {
       );
     }
 
-    // LeetCode stats
     if (user.leetcodeUsername) {
       promises.push(
         getLeetCodeStats(user.leetcodeUsername)
@@ -68,6 +114,12 @@ const getDashboardData = async (req, res) => {
     }
 
     await Promise.allSettled(promises);
+
+    // Trigger initial sync in background
+    syncUserData(user._id).catch((err) => {
+      console.error('[Dashboard] Initial sync failed:', err.message);
+    });
+
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
