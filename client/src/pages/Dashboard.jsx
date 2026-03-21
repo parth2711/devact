@@ -64,13 +64,30 @@ function Dashboard() {
     setSyncing(true);
     try {
       await API.post('/sync/now');
-      // Poll for completion
-      setTimeout(async () => {
-        await fetchDashboard();
-        await fetchSyncStatus();
-        await fetchSnapshots();
+      
+      // True polling: check every 3 seconds until lastFullSync updates
+      const initialSyncTime = syncStatus?.lastFullSync;
+      const pollInterval = setInterval(async () => {
+        try {
+          const res = await API.get('/sync/status');
+          if (res.data.lastFullSync !== initialSyncTime) {
+            clearInterval(pollInterval);
+            await fetchDashboard();
+            setSyncStatus(res.data);
+            await fetchSnapshots();
+            setSyncing(false);
+          }
+        } catch (pollErr) {
+          // ignore transient poll errors
+        }
+      }, 3000);
+
+      // Failsafe timeout after 30s
+      setTimeout(() => {
+        clearInterval(pollInterval);
         setSyncing(false);
-      }, 5000);
+      }, 30000);
+
     } catch (err) {
       const msg = err.response?.data?.message || 'Sync failed';
       alert(msg);

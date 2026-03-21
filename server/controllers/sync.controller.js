@@ -26,10 +26,11 @@ const triggerSync = async (req, res) => {
     // Run sync asynchronously — respond immediately, sync in background
     res.json({ message: 'Sync started', syncing: true });
 
-    // Fire and forget
-    syncUserData(userId).catch((err) => {
+    try {
+      await syncUserData(userId);
+    } catch (err) {
       console.error(`[Sync] Manual sync failed for ${userId}:`, err.message);
-    });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

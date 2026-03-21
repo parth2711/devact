@@ -85,16 +85,32 @@ const updateProfile = async (req, res) => {
       }
     }
 
+    const updateQuery = { $set: {}, $unset: {} };
+
+    if (name) updateQuery.$set.name = name;
+    if (githubUsername !== undefined) updateQuery.$set.githubUsername = githubUsername;
+    if (codeforcesHandle !== undefined) updateQuery.$set.codeforcesHandle = codeforcesHandle;
+    if (leetcodeUsername !== undefined) updateQuery.$set.leetcodeUsername = leetcodeUsername;
+    
+    // Explicitly handle empty string to avoid regex validation errors for sparse index
+    if (username) {
+      updateQuery.$set.username = username;
+    } else if (username === '') {
+      updateQuery.$unset.username = 1;
+      updateQuery.$set.isPublicProfile = false; // Turn off public if username is cleared
+    }
+
+    if (isPublicProfile !== undefined && username !== '') {
+      updateQuery.$set.isPublicProfile = isPublicProfile;
+    }
+
+    // Clean up empty $set or $unset to avoid Mongo errors
+    if (Object.keys(updateQuery.$set).length === 0) delete updateQuery.$set;
+    if (Object.keys(updateQuery.$unset).length === 0) delete updateQuery.$unset;
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      {
-        ...(name && { name }),
-        ...(githubUsername !== undefined && { githubUsername }),
-        ...(codeforcesHandle !== undefined && { codeforcesHandle }),
-        ...(leetcodeUsername !== undefined && { leetcodeUsername }),
-        ...(username !== undefined && { username }),
-        ...(isPublicProfile !== undefined && { isPublicProfile }),
-      },
+      updateQuery,
       { new: true, runValidators: true }
     );
 
