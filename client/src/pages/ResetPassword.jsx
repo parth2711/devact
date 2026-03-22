@@ -12,7 +12,7 @@ function ResetPassword() {
   
   const { token } = useParams();
   const navigate = useNavigate();
-  const { loginWithToken } = useAuth(); // If we want to automatically log them in
+  const { loginWithOAuth } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,14 +25,12 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      const { data } = await API.put(`/auth/resetpassword/${token}`, { password });
+      await API.put(`/auth/resetpassword/${token}`, { password });
       setSuccess(true);
       
-      // Auto login with new token
-      if (data.token) {
-        loginWithToken(data.token);
-        setTimeout(() => navigate('/dashboard'), 2000);
-      }
+      // Auto login — cookie was set by the server
+      await loginWithOAuth();
+      setTimeout(() => navigate('/dashboard'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid or expired token.');
     } finally {
