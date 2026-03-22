@@ -5,52 +5,46 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('devact_token'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
-
-  const fetchUser = async () => {
-    try {
-      const { data } = await API.get('/auth/me');
-      setUser(data);
-    } catch {
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
+    const checkAuth = async () => {
+      try {
+        const { data } = await API.get('/auth/me');
+        setUser(data);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const login = async (email, password) => {
     const { data } = await API.post('/auth/login', { email, password });
-    localStorage.setItem('devact_token', data.token);
-    setToken(data.token);
-    setUser({ _id: data._id, name: data.name, email: data.email });
+    setUser(data.user);
     return data;
   };
 
   const register = async (name, email, password) => {
     const { data } = await API.post('/auth/register', { name, email, password });
-    localStorage.setItem('devact_token', data.token);
-    setToken(data.token);
-    setUser({ _id: data._id, name: data.name, email: data.email });
+    setUser(data.user);
     return data;
   };
 
-  const loginWithToken = (newToken) => {
-    localStorage.setItem('devact_token', newToken);
-    setToken(newToken);
+  // Called after OAuth redirect — cookie is already set, just need to fetch user
+  const loginWithOAuth = async () => {
+    const { data } = await API.get('/auth/me');
+    setUser(data);
   };
 
-  const logout = () => {
-    localStorage.removeItem('devact_token');
-    setToken(null);
+  const logout = async () => {
+    try {
+      await API.post('/auth/logout');
+    } catch {
+      // ignore — clear local state regardless
+    }
     setUser(null);
   };
 
@@ -61,7 +55,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateProfile, loginWithToken }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile, loginWithOAuth, setUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,6 +2,9 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
+const { generalLimiter } = require('../server/middleware/rateLimiter');
 
 // Startup Config Check for WakaTime encryption
 if (!process.env.ENCRYPTION_KEY || Buffer.from(process.env.ENCRYPTION_KEY).length !== 32) {
@@ -20,16 +23,23 @@ const repoRoutes = require('../server/routes/repo.routes');
 const syncRoutes = require('../server/routes/sync.routes');
 const snapshotRoutes = require('../server/routes/snapshot.routes');
 const publicRoutes = require('../server/routes/public.routes');
+const accountRoutes = require('../server/routes/account.routes');
 
 const session = require('express-session');
 const passport = require('../server/config/passport');
 
 // ── Express App ──
 const app = express();
-app.use(cors());
+app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json());
+app.use(cookieParser());
 
-// Connect on every request (cached — only connects once)
+// Apply general rate limiter to all API routes
+app.use('/api', generalLimiter);
 app.use(async (req, res, next) => {
   try {
     await connectDB();
@@ -59,6 +69,7 @@ app.use('/api/repos', repoRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/u', publicRoutes);
+app.use('/api/account', accountRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -67,8 +78,12 @@ app.get('/api/health', (req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
+  console.error(err.message);
+  res.status(err.status || 500).json({
+    message: process.env.NODE_ENV === 'production'
+      ? 'Something went wrong'
+      : err.message,
+  });
 });
 
 module.exports = app;

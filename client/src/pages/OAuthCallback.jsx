@@ -1,21 +1,22 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 function OAuthCallback() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { loginWithToken } = useAuth();
+  const { loginWithOAuth } = useAuth();
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    if (token) {
-      loginWithToken(token);
-      navigate('/dashboard');
-    } else {
-      navigate('/login?error=oauth_failed');
-    }
-  }, [searchParams, navigate, loginWithToken]);
+    const handleCallback = async () => {
+      try {
+        await loginWithOAuth();
+        navigate('/dashboard');
+      } catch {
+        navigate('/login?error=oauth_failed');
+      }
+    };
+    handleCallback();
+  }, [navigate, loginWithOAuth]);
 
   return (
     <div className="page auth-page">

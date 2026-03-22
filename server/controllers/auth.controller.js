@@ -9,6 +9,13 @@ const generateToken = (id) => {
   });
 };
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
+
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
@@ -23,11 +30,10 @@ const registerUser = async (req, res) => {
 
     const user = await User.create({ name, email, password });
 
+    const token = generateToken(user._id);
+    res.cookie('token', token, COOKIE_OPTIONS);
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
+      user: { _id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -46,11 +52,10 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    const token = generateToken(user._id);
+    res.cookie('token', token, COOKIE_OPTIONS);
     res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
+      user: { _id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -196,16 +201,22 @@ const resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
+    const token = generateToken(user._id);
+    res.cookie('token', token, COOKIE_OPTIONS);
     res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
-      message: 'Password reset successful'
+      user: { _id: user._id, name: user.name, email: user.email },
+      message: 'Password reset successful',
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { registerUser, loginUser, getMe, updateProfile, forgotPassword, resetPassword };
+// @desc    Logout user (clear cookie)
+// @route   POST /api/auth/logout
+// @access  Private
+const logoutUser = (req, res) => {
+  res.clearCookie('token', COOKIE_OPTIONS).json({ message: 'Logged out' });
+};
+
+module.exports = { registerUser, loginUser, logoutUser, getMe, updateProfile, forgotPassword, resetPassword, COOKIE_OPTIONS };
