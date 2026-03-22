@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
 
 function Profile() {
-  const { user, updateProfile } = useAuth();
+  const { user, token, updateProfile } = useAuth();
   const [formData, setFormData] = useState({
     name: user?.name || '',
     username: user?.username || '',
@@ -178,7 +178,7 @@ function Profile() {
                 {user?.isGithubVerified ? (
                   <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 600 }}>✓ Verified via OAuth</span>
                 ) : (
-                  <a href={import.meta.env.DEV ? 'http://localhost:5000/api/auth/github' : '/api/auth/github'} style={{ color: '#3b82f6', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>
+                  <a href={import.meta.env.DEV ? `http://localhost:5000/api/auth/github/connect?token=${token}` : `/api/auth/github/connect?token=${token}`} style={{ color: '#3b82f6', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>
                     Connect Account
                   </a>
                 )}

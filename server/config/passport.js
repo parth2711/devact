@@ -10,9 +10,24 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
         callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:5000/api/auth/github/callback',
         scope: ['user:email'],
+        passReqToCallback: true,
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (req, accessToken, refreshToken, profile, done) => {
         try {
+          if (req.session && req.session.connectUserId) {
+            let user = await User.findById(req.session.connectUserId);
+            if (user) {
+              user.githubId = profile.id;
+              user.isGithubVerified = true;
+              if (!user.githubUsername) {
+                user.githubUsername = profile.username;
+              }
+              await user.save();
+              req.session.connectUserId = null;
+              return done(null, user);
+            }
+          }
+
           // Try to find user by githubId
           let user = await User.findOne({ githubId: profile.id });
 

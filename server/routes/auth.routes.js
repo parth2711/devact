@@ -15,6 +15,11 @@ router.put('/resetpassword/:resettoken', resetPassword);
 // GitHub OAuth routes
 router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
 
+router.get('/github/connect', protect, (req, res, next) => {
+  req.session.connectUserId = req.user._id;
+  passport.authenticate('github', { scope: ['user:email'] })(req, res, next);
+});
+
 router.get(
   '/github/callback',
   passport.authenticate('github', { failureRedirect: 'http://localhost:5173/login?error=oauth_failed' }),
