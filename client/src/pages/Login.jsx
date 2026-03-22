@@ -21,7 +21,8 @@ function Login() {
       await login(formData.email, formData.password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      const msg = err.response?.data?.message || err.response?.data?.error || (typeof err.response?.data === 'string' ? err.response.data : 'Login failed');
+      setError(typeof msg === 'string' ? msg.slice(0, 100) : 'Login failed');
     } finally {
       setLoading(false);
     }
