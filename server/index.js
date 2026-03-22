@@ -10,15 +10,21 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
 if (!process.env.ENCRYPTION_KEY || Buffer.from(process.env.ENCRYPTION_KEY).length !== 32) {
-  console.error('[Config] ENCRYPTION_KEY must be exactly 32 bytes for AES-256-CBC');
+  console.error('[Config] ENCRYPTION_KEY must be exactly 32 bytes. Current length:', 
+    process.env.ENCRYPTION_KEY ? Buffer.from(process.env.ENCRYPTION_KEY).length : 0
+  );
   process.exit(1);
 }
 
 if (!process.env.JWT_SECRET) {
-  console.warn('[Config] JWT_SECRET is not set. Using fallback.');
+  console.error('[Config] JWT_SECRET is not set');
+  process.exit(1);
 }
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+if (!process.env.FRONTEND_URL) {
+  console.error('[Config] FRONTEND_URL is not set');
+  process.exit(1);
+}
 
 const connectDB = require('./config/db');
 const session = require('express-session');
@@ -42,7 +48,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: process.env.FRONTEND_URL,
   credentials: true,
 }));
 
