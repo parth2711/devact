@@ -27,6 +27,7 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return data;
     } catch (err) {
+      console.error('[AuthContext] Login failed:', err.response || err);
       // Re-throw the error so the component can handle it
       throw err;
     }
