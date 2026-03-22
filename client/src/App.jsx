@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import CPTracker from './pages/CPTracker';
 import GitHubTracker from './pages/GitHubTracker';
 import RepoVisualizer from './pages/RepoVisualizer';
+import PracticeReview from './pages/PracticeReview';
 import PublicProfile from './pages/PublicProfile';
 import './App.css';
 
@@ -68,6 +69,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <RepoVisualizer />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/practice"
+                element={
+                  <ProtectedRoute>
+                    <PracticeReview />
                   </ProtectedRoute>
                 }
               />

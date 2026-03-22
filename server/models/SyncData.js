@@ -72,6 +72,34 @@ const syncDataSchema = new mongoose.Schema(
       },
       lastSyncedAt: { type: Date, default: null },
     },
+    practiceReview: {
+      codeforces: {
+        type: [{
+          name: String,
+          index: String,
+          contestId: Number,
+          rating: Number,
+          verdict: String,
+          link: String,
+          submittedAt: Date,
+        }],
+        default: [],
+      },
+      leetcode: {
+        type: [{
+          title: String,
+          titleSlug: String,
+          difficulty: String,
+          verdict: String,
+          link: String,
+          editorialLink: String,
+          submittedAt: Date,
+        }],
+        default: [],
+      },
+      failedPlatforms: { type: [String], default: [] },
+      lastSyncedAt: { type: Date, default: null },
+    },
     lastFullSync: {
       type: Date,
       default: null,

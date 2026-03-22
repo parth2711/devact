@@ -2,8 +2,8 @@ const User = require('../models/User');
 const SyncData = require('../models/SyncData');
 const DailySnapshot = require('../models/DailySnapshot');
 const { getUserStats, getUserRepos, getUserActivity } = require('./github.service');
-const { getUserInfo, getSubmissions, getRatingHistory } = require('./codeforces.service');
-const { getLeetCodeStats } = require('./leetcode.service');
+const { getUserInfo, getSubmissions, getRatingHistory, getFailedProblems } = require('./codeforces.service');
+const { getLeetCodeStats, getRecentFailedSubmissions } = require('./leetcode.service');
 const { getWakatimeStats } = require('./wakatime.service');
 const { getStackOverflowStats } = require('./stackoverflow.service');
 const { getPackageStats } = require('./packages.service');
@@ -98,6 +98,38 @@ async function syncUserData(userId) {
 
   if (pkgRes.status === 'fulfilled' && pkgRes.value !== undefined && pkgRes.value !== null) {
     syncData.packages = { ...pkgRes.value, lastSyncedAt: now };
+  }
+
+  // --- Practice Review (cached during sync) ---
+  const practiceReviewPromises = [];
+  const practiceReviewLabels = [];
+
+  if (user.codeforcesHandle) {
+    practiceReviewPromises.push(getFailedProblems(user.codeforcesHandle));
+    practiceReviewLabels.push('codeforces');
+  }
+  if (user.leetcodeUsername) {
+    practiceReviewPromises.push(getRecentFailedSubmissions(user.leetcodeUsername));
+    practiceReviewLabels.push('leetcode');
+  }
+
+  if (practiceReviewPromises.length > 0) {
+    const prResults = await Promise.allSettled(practiceReviewPromises);
+    const failedPlatforms = [];
+    const prData = { codeforces: [], leetcode: [], failedPlatforms: [], lastSyncedAt: now };
+
+    prResults.forEach((r, i) => {
+      const platform = practiceReviewLabels[i];
+      if (r.status === 'fulfilled') {
+        prData[platform] = r.value;
+      } else {
+        failedPlatforms.push(platform);
+        console.error(`[Sync] Practice Review ${platform} failed:`, r.reason?.message || r.reason);
+      }
+    });
+
+    prData.failedPlatforms = failedPlatforms;
+    syncData.practiceReview = prData;
   }
 
   syncData.lastFullSync = now;

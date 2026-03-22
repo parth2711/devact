@@ -265,6 +265,9 @@ function RepoVisualizer() {
               <div className="ai-markdown">
                 <ReactMarkdown>{aiFeedback}</ReactMarkdown>
               </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '1rem', textAlign: 'center', opacity: 0.7 }}>
+                AI-generated · not stored · based on public repository data
+              </p>
             </div>
           )}
 

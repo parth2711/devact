@@ -271,6 +271,18 @@ function Dashboard() {
           )}
         </Link>
 
+        <Link to="/practice" className="dashboard-card dashboard-card-link">
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>📝 Practice Review</h3>
+          <p>Review problems you attempted but didn't solve, with links to editorials.</p>
+          {user?.codeforcesHandle || user?.leetcodeUsername ? (
+            <span className="badge badge-connected">
+              {[user?.codeforcesHandle && `CF: ${user.codeforcesHandle}`, user?.leetcodeUsername && `LC: ${user.leetcodeUsername}`].filter(Boolean).join(' / ')}
+            </span>
+          ) : (
+            <span className="badge">Not Connected</span>
+          )}
+        </Link>
+
         {/* LeetCode Summary Card */}
         {data?.leetcode && (
           <div className="dashboard-card">

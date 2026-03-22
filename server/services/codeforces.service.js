@@ -73,4 +73,38 @@ async function getRatingHistory(handle) {
   }));
 }
 
-module.exports = { getUserInfo, getSubmissions, getRatingHistory };
+/**
+ * Get failed/unsolved problems from recent submissions.
+ * Deduplicates keeping only the most recent submission per unique problem.
+ */
+async function getFailedProblems(handle) {
+  const res = await fetch(`${CF_API}/user.status?handle=${handle}&from=1&count=100`);
+  const data = await res.json();
+
+  if (data.status !== 'OK') {
+    throw new Error(data.comment || 'Failed to fetch submissions');
+  }
+
+  const failed = data.result.filter(sub => sub.verdict && sub.verdict !== 'OK');
+
+  // Deduplicate: keep only most recent per contestId+index
+  const seen = new Map();
+  for (const sub of failed) {
+    const key = `${sub.contestId}-${sub.problem.index}`;
+    if (!seen.has(key)) {
+      seen.set(key, {
+        name: sub.problem.name,
+        index: sub.problem.index,
+        contestId: sub.contestId,
+        rating: sub.problem.rating || null,
+        verdict: sub.verdict,
+        link: `https://codeforces.com/contest/${sub.contestId}/problem/${sub.problem.index}`,
+        submittedAt: new Date(sub.creationTimeSeconds * 1000),
+      });
+    }
+  }
+
+  return Array.from(seen.values());
+}
+
+module.exports = { getUserInfo, getSubmissions, getRatingHistory, getFailedProblems };

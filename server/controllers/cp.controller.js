@@ -77,6 +77,21 @@ const getLeetCode = async (req, res) => {
   }
 };
 
+// @desc    Get practice review (failed problems, cached)
+// @route   GET /api/cp/practice-review
+// @access  Private
+const getPracticeReview = async (req, res) => {
+  try {
+    const syncData = await SyncData.findOne({ userId: req.user._id });
+    if (!syncData?.practiceReview) {
+      return res.json({ codeforces: [], leetcode: [], failedPlatforms: [], lastSyncedAt: null });
+    }
+    res.json(syncData.practiceReview);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // -- Verification endpoints remain unchanged --
 
 const initCodeforcesVerification = async (req, res) => {
@@ -118,4 +133,4 @@ const checkCodeforcesVerification = async (req, res) => {
   }
 };
 
-module.exports = { getCPStats, getCPSubmissions, getLeetCode, initCodeforcesVerification, checkCodeforcesVerification };
+module.exports = { getCPStats, getCPSubmissions, getLeetCode, getPracticeReview, initCodeforcesVerification, checkCodeforcesVerification };
