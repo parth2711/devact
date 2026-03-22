@@ -22,9 +22,14 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await API.post('/auth/login', { email, password });
-    setUser(data.user);
-    return data;
+    try {
+      const { data } = await API.post('/auth/login', { email, password });
+      setUser(data.user);
+      return data;
+    } catch (err) {
+      // Re-throw the error so the component can handle it
+      throw err;
+    }
   };
 
   const register = async (name, email, password) => {
