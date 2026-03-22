@@ -156,8 +156,8 @@ const forgotPassword = async (req, res) => {
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    // Since frontend is typically running on port 5173
-    const frontendResetUrl = `http://localhost:5173/resetpassword/${resetToken}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendResetUrl = `${frontendUrl}/resetpassword/${resetToken}`;
 
     console.log(`\n=================================\nPASSWORD RESET LINK:\n${frontendResetUrl}\n=================================\n`);
 

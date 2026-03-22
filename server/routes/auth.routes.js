@@ -22,14 +22,15 @@ router.get('/github/connect', protect, (req, res, next) => {
 
 router.get(
   '/github/callback',
-  passport.authenticate('github', { failureRedirect: 'http://localhost:5173/login?error=oauth_failed' }),
+  passport.authenticate('github', { failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=oauth_failed` }),
   (req, res) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     // Generate JWT
     const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE || '7d',
     });
     // Redirect to frontend with token
-    res.redirect(`http://localhost:5173/oauth/callback?token=${token}`);
+    res.redirect(`${frontendUrl}/oauth/callback?token=${token}`);
   }
 );
 
