@@ -23,9 +23,7 @@ const getWakatimeStats = async (apiKey) => {
 
     const data = response.data?.data;
     
-    // Explicit guard against partial/0-second data returns when a user connects for the first time
-    if (!data || data.total_seconds === 0) {
-      console.warn('[Sync] WakaTime returned 0 total_seconds. Skipping to guard against lag drops.');
+    if (!data) {
       return null;
     }
 

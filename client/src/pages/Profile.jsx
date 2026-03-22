@@ -139,7 +139,7 @@ function Profile() {
                 id="username"
                 type="text"
                 name="username"
-                placeholder="e.g. parth2711"
+                placeholder="e.g. johndoe"
                 value={formData.username}
                 onChange={handleChange}
                 pattern="[a-z0-9_]{3,20}"

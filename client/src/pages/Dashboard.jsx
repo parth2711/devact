@@ -308,7 +308,7 @@ function Dashboard() {
         )}
 
         {/* WakaTime Integration Card */}
-        {data?.wakatime?.totalSeconds > 0 ? (
+        {data?.wakatime && data.wakatime.totalSeconds > 0 ? (
           <div className="dashboard-card" style={{ padding: '1.5rem' }}>
             <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
               ⏱️ WakaTime Languages
@@ -321,6 +321,10 @@ function Dashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        ) : data?.wakatime && data.wakatime.totalSeconds === 0 ? (
+          <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>⏱️ No coding activity tracked by WakaTime this week.</p>
           </div>
         ) : user?.wakatimeConfiguredAt && !data?.wakatime ? (
           <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
