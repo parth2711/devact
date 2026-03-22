@@ -42,7 +42,15 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email }).select('+password');
-    if (!user || !(await user.matchPassword(password))) {
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    if (!user.password && user.githubId) {
+      return res.status(401).json({ message: 'This email is linked to a GitHub account. Please use "Continue with GitHub".' });
+    }
+
+    if (!(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
