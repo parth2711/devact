@@ -1,7 +1,7 @@
 const SyncData = require('../models/SyncData');
 const { syncUserData } = require('../services/sync.service');
 
-const SYNC_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes
+const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
 // @desc    Trigger manual sync for logged-in user
 // @route   POST /api/sync/now
