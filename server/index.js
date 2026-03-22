@@ -15,14 +15,10 @@ if (!process.env.ENCRYPTION_KEY || Buffer.from(process.env.ENCRYPTION_KEY).lengt
 }
 
 if (!process.env.JWT_SECRET) {
-  console.error('[Config] JWT_SECRET is not set');
-  process.exit(1);
+  console.warn('[Config] JWT_SECRET is not set. Using fallback.');
 }
 
-if (!process.env.FRONTEND_URL) {
-  console.error('[Config] FRONTEND_URL is not set');
-  process.exit(1);
-}
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const connectDB = require('./config/db');
 const session = require('express-session');
@@ -46,7 +42,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: FRONTEND_URL,
   credentials: true,
 }));
 

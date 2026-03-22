@@ -27,13 +27,15 @@ const accountRoutes = require('../server/routes/account.routes');
 const session = require('express-session');
 const passport = require('../server/config/passport');
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 // ── Express App ──
 const app = express();
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: FRONTEND_URL,
   credentials: true,
 }));
 app.use(express.json());
