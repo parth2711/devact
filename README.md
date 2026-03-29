@@ -1,6 +1,8 @@
 # DevAct
 
-A developer activity tracking platform that aggregates GitHub contributions, competitive programming stats, and repository insights into a unified dashboard.
+A developer activity tracking platform that aggregates GitHub contributions, competitive programming stats, coding time, and more into a clean unified dashboard.
+
+Live at **[devact.vercel.app](https://devact.vercel.app)**
 
 Built with the MERN stack (MongoDB, Express, React, Node.js).
 
@@ -10,21 +12,27 @@ Built with the MERN stack (MongoDB, Express, React, Node.js).
 
 | Feature | Description |
 |---|---|
-| **GitHub Tracker** | Monitor commits, PRs, and contribution streaks |
-| **CP Tracker** | Codeforces ratings, LeetCode progress, contest history |
-| **Repo Visualizer** | Language breakdown across repositories |
-| **Dashboard** | Unified view of all developer metrics |
-| **Authentication** | Secure JWT-based login and registration |
+| **GitHub Tracker** | Monitor commits, PRs, and contribution streaks across all repositories |
+| **CP Tracker** | Codeforces ratings, LeetCode progress, and full contest history |
+| **Repo Visualizer** | Language breakdowns, star counts, and activity across your repos |
+| **Practice Review** | Problems you attempted but didn't solve — with editorial links |
+| **WakaTime Integration** | Weekly coding time and per-language breakdown |
+| **Stack Overflow** | Reputation, badges, and top answers |
+| **npm / PyPI Packages** | Weekly download stats for your open-source packages |
+| **Trend Charts** | 30-day history charts for ratings, solved count, and GitHub stars |
+| **Public Profile** | Shareable developer profile at `/u/:username` |
+| **Authentication** | JWT-based login, registration, and GitHub OAuth |
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** React (Vite), React Router, Axios
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB (Atlas), Mongoose
-- **Auth:** JWT, bcryptjs
-- **APIs:** GitHub REST API, Codeforces API, LeetCode GraphQL API
+- **Frontend:** React (Vite), React Router, Recharts, Axios
+- **Backend:** Node.js, Express.js, Passport.js
+- **Database:** MongoDB Atlas, Mongoose
+- **Auth:** JWT (httpOnly cookies), bcryptjs, GitHub OAuth2
+- **APIs:** GitHub REST, Codeforces, LeetCode GraphQL, WakaTime, Stack Overflow, npm Registry, PyPI
+- **Deployment:** Vercel (monorepo — client + server)
 
 ---
 
@@ -34,19 +42,21 @@ Built with the MERN stack (MongoDB, Express, React, Node.js).
 devact/
 ├── client/                 # React frontend (Vite)
 │   └── src/
-│       ├── api/            # Axios config
+│       ├── api/            # Axios instance
 │       ├── components/     # Navbar, Footer, ProtectedRoute
 │       ├── context/        # AuthContext
-│       └── pages/          # Dashboard, GitHubTracker, CPTracker, RepoVisualizer, Profile
+│       └── pages/          # Dashboard, GitHubTracker, CPTracker, RepoVisualizer,
+│                           # PracticeReview, Profile, ManageAccount, PublicProfile
 ├── server/                 # Express backend
-│   ├── config/             # Database connection
+│   ├── config/             # DB connection, Passport config
 │   ├── controllers/        # Route handlers
-│   ├── middleware/          # Auth middleware
-│   ├── models/             # Mongoose schemas
-│   ├── routes/             # API routes
-│   └── services/           # External API integrations (GitHub, Codeforces, LeetCode)
+│   ├── cron/               # Daily sync cron job
+│   ├── middleware/         # Auth + rate limiter
+│   ├── models/             # Mongoose schemas (User, SyncData, DailySnapshot)
+│   ├── routes/             # API route definitions
+│   └── services/           # External API integrations
 ├── .env.example            # Environment variables template
-└── package.json            # Root scripts
+└── package.json            # Root scripts (concurrently)
 ```
 
 ---
@@ -64,25 +74,31 @@ devact/
 git clone https://github.com/parth2711/devact.git
 cd devact
 
-# Copy environment config
+# Copy environment config and fill in values
 cp .env.example .env
-# Edit .env with your MongoDB URI, JWT secret, and GitHub token
 
-# Install all dependencies
+# Install all dependencies (root + server + client)
 npm run install-all
 
-# Start development (client + server)
+# Start development (client + server concurrently)
 npm run dev
 ```
+
+Client runs on `http://localhost:5173`, server on `http://localhost:5000`.
 
 ### Environment Variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `MONGO_URI` | Yes | MongoDB connection string |
-| `JWT_SECRET` | Yes | Secret for signing JWT tokens |
-| `JWT_EXPIRE` | No | Token expiry (default: `7d`) |
-| `GITHUB_TOKEN` | Recommended | GitHub PAT for higher API rate limits |
+| `MONGO_URI` | ✅ | MongoDB connection string |
+| `JWT_SECRET` | ✅ | Secret for signing JWT tokens |
+| `FRONTEND_URL` | ✅ | Frontend origin for CORS (e.g. `http://localhost:5173`) |
+| `ENCRYPTION_KEY` | ✅ | Exactly 32-byte key for encrypting WakaTime tokens |
+| `JWT_EXPIRE` | No | Token expiry duration (default: `7d`) |
+| `GITHUB_TOKEN` | Recommended | GitHub PAT — raises API rate limit from 60 to 5000/hr |
+| `GITHUB_CLIENT_ID` | OAuth | GitHub OAuth App client ID |
+| `GITHUB_CLIENT_SECRET` | OAuth | GitHub OAuth App client secret |
+| `GEMINI_API_KEY` | AI features | Google Gemini API key for AI insights |
 
 ### Scripts
 
@@ -90,8 +106,8 @@ npm run dev
 |---|---|
 | `npm run dev` | Start client + server concurrently |
 | `npm run client` | Start React dev server only |
-| `npm run server` | Start Express dev server only |
-| `npm run install-all` | Install dependencies for root, server, and client |
+| `npm run server` | Start Express server only |
+| `npm run install-all` | Install all dependencies |
 
 ---
 
@@ -99,7 +115,7 @@ npm run dev
 
 | Branch | Purpose |
 |---|---|
-| `main` | Stable releases |
+| `main` | Production — auto-deploys to Vercel |
 | `development` | Active development — features merge here first |
 | `feature/*` | Individual feature branches |
 
@@ -107,7 +123,8 @@ npm run dev
 
 ## Known Limitations
 
-- **Handle Changes**: DevAct's daily snapshot tracking relies on a background sync engine that maps external data to an internal user ID. If you change your GitHub username or Codeforces handle and update your profile, the sync engine will start pulling data for the new handle, but old `DailySnapshot` entries will remain. This may cause a temporary discontinuity in your trend charts.
+- **Handle changes:** If you change your GitHub username or Codeforces handle and update your profile, old `DailySnapshot` entries remain. Trend charts may show a temporary discontinuity until new snapshots accumulate.
+- **WakaTime sync:** Requires a valid API key configured in your profile. Data reflects the past 7 days as returned by the WakaTime API.
 
 ---
 
