@@ -16,41 +16,41 @@ function Navbar() {
   };
 
   const closeMenu = () => setIsMobileMenuOpen(false);
-
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
     <nav className="navbar">
       <div className="navbar-brand">
         <Link to="/" onClick={closeMenu}>
+          <span className="logo-dot" />
           <span className="logo-text">DevAct</span>
         </Link>
       </div>
-      
-      <button 
-        className="mobile-menu-btn" 
+
+      <button
+        className="mobile-menu-btn"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         aria-label="Toggle menu"
       >
-        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
 
       <div className={`navbar-links ${isMobileMenuOpen ? 'active' : ''}`}>
         {user ? (
           <>
-            <Link to="/dashboard" className={isActive('/dashboard')} onClick={closeMenu}>Dashboard</Link>
-            <Link to="/github" className={isActive('/github')} onClick={closeMenu}>GitHub</Link>
-            <Link to="/cp" className={isActive('/cp')} onClick={closeMenu}>CP</Link>
-            <Link to="/repos" className={isActive('/repos')} onClick={closeMenu}>Repos</Link>
-            <Link to="/practice" className={isActive('/practice')} onClick={closeMenu}>Practice</Link>
-            <Link to="/profile" className={isActive('/profile')} onClick={closeMenu}>Profile</Link>
-            <Link to="/account" className={isActive('/account')} onClick={closeMenu}>Account</Link>
-            <button onClick={handleLogout} className="btn btn-secondary btn-sm nav-logout-btn">Logout</button>
+            <Link to="/dashboard"  className={isActive('/dashboard')}  onClick={closeMenu}>Dashboard</Link>
+            <Link to="/github"     className={isActive('/github')}     onClick={closeMenu}>GitHub</Link>
+            <Link to="/cp"         className={isActive('/cp')}         onClick={closeMenu}>CP</Link>
+            <Link to="/repos"      className={isActive('/repos')}      onClick={closeMenu}>Repos</Link>
+            <Link to="/practice"   className={isActive('/practice')}   onClick={closeMenu}>Practice</Link>
+            <Link to="/profile"    className={isActive('/profile')}    onClick={closeMenu}>Profile</Link>
+            <Link to="/account"    className={isActive('/account')}    onClick={closeMenu}>Account</Link>
+            <button onClick={handleLogout} className="nav-logout-btn">Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login" className={isActive('/login')} onClick={closeMenu}>Login</Link>
-            <Link to="/register" className="btn btn-primary btn-sm" onClick={closeMenu}>Sign Up</Link>
+            <Link to="/login"    className={isActive('/login')}    onClick={closeMenu}>Login</Link>
+            <Link to="/register" className="btn btn-primary btn-sm" onClick={closeMenu}>Get Started</Link>
           </>
         )}
       </div>
