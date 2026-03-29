@@ -1,5 +1,5 @@
 const SyncData = require('../models/SyncData');
-const { getUserRepos, getUserActivity, getUserStats } = require('../services/github.service');
+const { getUserRepos, getUserActivity, getUserStats, getContributionCalendar } = require('../services/github.service');
 
 // @desc    Get GitHub repositories (from cache)
 // @route   GET /api/github/repos
@@ -68,4 +68,23 @@ const getGithubStats = async (req, res) => {
   }
 };
 
-module.exports = { getGithubRepos, getGithubActivity, getGithubStats };
+// @desc    Get GitHub contribution calendar (live, not cached)
+// @route   GET /api/github/contributions
+// @access  Private
+const getGithubContributions = async (req, res) => {
+  try {
+    const username = req.user.githubUsername;
+    if (!username) {
+      return res.status(400).json({ message: 'GitHub username not set.' });
+    }
+    const calendar = await getContributionCalendar(username, process.env.GITHUB_TOKEN);
+    if (!calendar) {
+      return res.status(503).json({ message: 'Could not fetch contribution data. Ensure GITHUB_TOKEN is set.' });
+    }
+    res.json(calendar);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getGithubRepos, getGithubActivity, getGithubStats, getGithubContributions };

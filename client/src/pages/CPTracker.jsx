@@ -8,6 +8,7 @@ function CPTracker() {
   const [cfStats, setCfStats] = useState(null);
   const [cfSubmissions, setCfSubmissions] = useState([]);
   const [lcStats, setLcStats] = useState(null);
+  const [lcSubmissions, setLcSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -35,7 +36,8 @@ function CPTracker() {
 
       if (hasLC) {
         promises.push(
-          API.get('/cp/leetcode').then((r) => setLcStats(r.data))
+          API.get('/cp/leetcode').then((r) => setLcStats(r.data)),
+          API.get('/cp/leetcode/submissions').then((r) => setLcSubmissions(r.data)).catch(() => {})
         );
       }
 
@@ -182,10 +184,50 @@ function CPTracker() {
               <span>Global Ranking: <strong>#{lcStats.ranking.toLocaleString()}</strong></span>
             </div>
           )}
+
+          {/* LeetCode Recent Submissions */}
+          {lcSubmissions.length > 0 && (
+            <div className="cp-section">
+              <h4>Recent Submissions</h4>
+              <div className="submissions-list">
+                {lcSubmissions.slice(0, 10).map((sub, i) => (
+                  <a
+                    key={i}
+                    href={sub.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="submission-item"
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    <div className="submission-info">
+                      <span className="submission-problem">{sub.title}</span>
+                      <span className="submission-lang">{sub.lang}</span>
+                    </div>
+                    <div className="submission-meta">
+                      <span className={`verdict ${sub.status === 'Accepted' ? 'accepted' : 'rejected'}`}>
+                        {sub.status}
+                      </span>
+                      <span className="submission-lang" style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                        {timeAgo(sub.submittedAt)}
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
   );
+}
+
+function timeAgo(dateStr) {
+  const seconds = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return `${Math.floor(seconds / 86400)}d ago`;
 }
 
 export default CPTracker;

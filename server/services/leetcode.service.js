@@ -123,3 +123,45 @@ async function getRecentFailedSubmissions(username) {
 }
 
 module.exports = { getLeetCodeStats, getRecentFailedSubmissions };
+
+/**
+ * Fetch all recent LeetCode submissions (accepted + failed), limit 20.
+ */
+async function getRecentSubmissions(username) {
+  const query = `
+    query getRecentSubmissions($username: String!, $limit: Int!) {
+      recentSubmissionList(username: $username, limit: $limit) {
+        title
+        titleSlug
+        statusDisplay
+        lang
+        timestamp
+      }
+    }
+  `;
+
+  const res = await fetch(LC_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': 'DevAct',
+    },
+    body: JSON.stringify({ query, variables: { username, limit: 20 } }),
+  });
+
+  if (!res.ok) throw new Error(`LeetCode API error: ${res.status}`);
+
+  const data = await res.json();
+  const submissions = data.data?.recentSubmissionList || [];
+
+  return submissions.map((s) => ({
+    title: s.title,
+    titleSlug: s.titleSlug,
+    status: s.statusDisplay,
+    lang: s.lang,
+    link: `https://leetcode.com/problems/${s.titleSlug}/`,
+    submittedAt: new Date(parseInt(s.timestamp) * 1000),
+  }));
+}
+
+module.exports = { getLeetCodeStats, getRecentFailedSubmissions, getRecentSubmissions };

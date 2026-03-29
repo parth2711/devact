@@ -17,6 +17,7 @@ import RepoVisualizer from './pages/RepoVisualizer';
 import PracticeReview from './pages/PracticeReview';
 import ManageAccount from './pages/ManageAccount';
 import PublicProfile from './pages/PublicProfile';
+import NotFound from './pages/NotFound';
 import './App.css';
 
 function App() {
@@ -90,6 +91,7 @@ function App() {
                 }
               />
               <Route path="/u/:username" element={<PublicProfile />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />
