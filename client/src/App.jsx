@@ -18,6 +18,8 @@ import PracticeReview from './pages/PracticeReview';
 import ManageAccount from './pages/ManageAccount';
 import PublicProfile from './pages/PublicProfile';
 import NotFound from './pages/NotFound';
+import Contests from './pages/Contests';
+import Journal from './pages/Journal';
 import './App.css';
 
 function App() {
@@ -91,6 +93,14 @@ function App() {
                 }
               />
               <Route path="/u/:username" element={<PublicProfile />} />
+              <Route
+                path="/contests"
+                element={<ProtectedRoute><Contests /></ProtectedRoute>}
+              />
+              <Route
+                path="/journal"
+                element={<ProtectedRoute><Journal /></ProtectedRoute>}
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

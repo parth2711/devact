@@ -1,9 +1,175 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
-import { Github, Code2, BarChart2, RefreshCw, TrendingUp } from 'lucide-react';
+import { Github, Code2, BarChart2, RefreshCw, TrendingUp, Flame, Plus, Trash2, Check, Trophy } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+
+/* ─────────────────────────────────────────
+   Streak Widget
+───────────────────────────────────────── */
+function StreakWidget() {
+  const [streak, setStreak] = useState(null);
+  useEffect(() => { API.get('/streak').then(r => setStreak(r.data)).catch(() => {}); }, []);
+  if (!streak) return null;
+  return (
+    <div className="dashboard-card" style={{ padding: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+          <Flame size={18} style={{ color: streak.currentStreak > 0 ? '#f97316' : 'var(--text-muted)' }} />
+          Coding Streak
+        </h3>
+        <div style={{ display: 'flex', gap: '1.5rem', textAlign: 'center' }}>
+          {[['Current', streak.currentStreak, streak.currentStreak > 0 ? '#f97316' : 'var(--text-muted)'],
+            ['Best', streak.longestStreak, 'var(--text-secondary)'],
+            ['Total Days', streak.totalActiveDays, 'var(--text-secondary)']].map(([label, val, color]) => (
+            <div key={label}>
+              <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.8rem', fontWeight: 800, color, lineHeight: 1 }}>{val}</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '0.2rem' }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap' }}>
+        {streak.last52.map(({ date, active }) => (
+          <div key={date} title={date} style={{ width: '12px', height: '12px', borderRadius: '3px', background: active ? '#f97316' : 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+        ))}
+      </div>
+      {!streak.activeToday && (
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.75rem', textAlign: 'center' }}>
+          No activity yet today — commit, submit, or code to keep your streak alive 🔥
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   Goals Widget
+───────────────────────────────────────── */
+const GOAL_PRESETS = [
+  { label: 'Solve 1 LC problem',    type: 'lc_solved',      target: 1 },
+  { label: 'Solve 2 LC problems',   type: 'lc_solved',      target: 2 },
+  { label: 'Submit on CF',          type: 'cf_submitted',   target: 1 },
+  { label: 'Code for 2h (Waka)',    type: 'waka_hours',     target: 2 },
+  { label: 'Code for 4h (Waka)',    type: 'waka_hours',     target: 4 },
+  { label: 'Make 3 GitHub commits', type: 'github_commits', target: 3 },
+];
+
+function GoalsWidget() {
+  const [goals, setGoals]     = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding]   = useState(false);
+  const [customLabel, setCustomLabel] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    API.get('/goals').then(r => setGoals(r.data.goals || [])).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  const persist = async (list) => {
+    const payload = list.map(({ id, label, type, target }) => ({ id, label, type, target, enabled: true }));
+    await API.put('/goals', { goals: payload }).catch(() => {});
+  };
+
+  const addPreset = async (preset) => {
+    const g = { id: crypto.randomUUID(), label: preset.label, type: preset.type, target: preset.target, current: 0, done: false };
+    const updated = [...goals, g];
+    setGoals(updated); setAdding(false); await persist(updated);
+  };
+
+  const addCustom = async () => {
+    if (!customLabel.trim()) return;
+    const g = { id: crypto.randomUUID(), label: customLabel.trim(), type: 'custom', target: 1, current: 0, done: false };
+    const updated = [...goals, g];
+    setGoals(updated); setCustomLabel(''); setAdding(false); await persist(updated);
+  };
+
+  const removeGoal = async (id) => { const u = goals.filter(g => g.id !== id); setGoals(u); await persist(u); };
+  const toggleDone = (id) => setGoals(goals.map(g => g.id === id ? { ...g, done: !g.done } : g));
+
+  const doneCount = goals.filter(g => g.done || (g.type !== 'custom' && (g.current || 0) >= g.target)).length;
+  const allDone   = goals.length > 0 && doneCount === goals.length;
+
+  if (loading) return null;
+
+  return (
+    <div className="dashboard-card" style={{ padding: '1.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+          <Trophy size={18} style={{ color: allDone ? '#10b981' : 'var(--accent-primary)' }} />
+          Today's Goals
+          {goals.length > 0 && (
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, background: allDone ? 'rgba(16,185,129,0.15)' : 'rgba(168,85,247,0.15)', color: allDone ? '#10b981' : 'var(--accent-primary)', borderRadius: '20px', padding: '0.15rem 0.6rem' }}>
+              {doneCount}/{goals.length}
+            </span>
+          )}
+        </h3>
+        <button onClick={() => { setAdding(!adding); setTimeout(() => inputRef.current?.focus(), 50); }}
+          style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.3rem 0.6rem', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem' }}>
+          <Plus size={13} /> Add
+        </button>
+      </div>
+
+      {goals.length === 0 && !adding && (
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>No goals yet — add one to track your daily targets.</p>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: adding ? '1rem' : 0 }}>
+        {goals.map((g) => {
+          const pct = g.type === 'custom' ? (g.done ? 100 : 0) : Math.min(100, Math.round(((g.current || 0) / g.target) * 100));
+          const isDone = g.done || pct >= 100;
+          return (
+            <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.8rem', background: isDone ? 'rgba(16,185,129,0.06)' : 'var(--bg-secondary)', borderRadius: '8px', border: `1px solid ${isDone ? 'rgba(16,185,129,0.25)' : 'var(--border-color)'}`, transition: 'all 0.2s' }}>
+              <button onClick={() => g.type === 'custom' && toggleDone(g.id)}
+                style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isDone ? '#10b981' : 'var(--border-color)'}`, background: isDone ? '#10b981' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: g.type === 'custom' ? 'pointer' : 'default', transition: 'all 0.2s' }}>
+                {isDone && <Check size={10} color="#fff" strokeWidth={3} />}
+              </button>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 500, color: isDone ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: isDone ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.label}</div>
+                {g.type !== 'custom' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.3rem' }}>
+                    <div style={{ flex: 1, height: '3px', background: 'var(--border-color)', borderRadius: '2px' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: isDone ? '#10b981' : 'var(--accent-primary)', borderRadius: '2px', transition: 'width 0.4s ease' }} />
+                    </div>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flexShrink: 0 }}>{g.current || 0}/{g.target}</span>
+                  </div>
+                )}
+              </div>
+              <button onClick={() => removeGoal(g.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.1rem', flexShrink: 0 }}>
+                <Trash2 size={13} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      {adding && (
+        <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem' }}>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Quick Add</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem' }}>
+            {GOAL_PRESETS.map(p => (
+              <button key={p.label} onClick={() => addPreset(p)}
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '0.3rem 0.8rem', fontSize: '0.78rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input ref={inputRef} value={customLabel} onChange={e => setCustomLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCustom()}
+              placeholder="Or type a custom goal…"
+              style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.85rem', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'inherit', outline: 'none' }} />
+            <button className="btn btn-primary btn-sm" onClick={addCustom} disabled={!customLabel.trim()}>Add</button>
+          </div>
+        </div>
+      )}
+      {allDone && goals.length > 0 && (
+        <p style={{ fontSize: '0.82rem', color: '#10b981', textAlign: 'center', marginTop: '0.75rem', fontWeight: 600 }}>🎉 All goals done for today!</p>
+      )}
+    </div>
+  );
+}
 
 function Dashboard() {
   const { user }                        = useAuth();
@@ -112,6 +278,13 @@ function Dashboard() {
           Connect your accounts in <Link to="/profile">Profile</Link> to see real data here.
         </div>
       )}
+
+
+      {/* ── Streak + Goals ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '0.5rem' }}>
+        <StreakWidget />
+        <GoalsWidget />
+      </div>
 
       {/* ── WakaTime headline ── */}
       {data?.wakatime?.totalSeconds > 0 && (
@@ -254,6 +427,19 @@ function Dashboard() {
                 {[user?.codeforcesHandle && `CF: ${user.codeforcesHandle}`, user?.leetcodeUsername && `LC: ${user.leetcodeUsername}`].filter(Boolean).join(' / ')}
               </span>
             : <span className="badge">Not Connected</span>}
+        </Link>
+
+
+        <Link to="/contests" className="dashboard-card dashboard-card-link">
+          <h3>🏆 Contest Calendar</h3>
+          <p>Upcoming Codeforces and LeetCode contests with countdowns and register links.</p>
+          <span className="badge badge-connected">CF + LC</span>
+        </Link>
+
+        <Link to="/journal" className="dashboard-card dashboard-card-link">
+          <h3>📓 Dev Journal</h3>
+          <p>Log what you worked on each day. Build a personal history of your growth.</p>
+          <span className="badge">Daily Log</span>
         </Link>
 
         {/* LeetCode Summary */}
