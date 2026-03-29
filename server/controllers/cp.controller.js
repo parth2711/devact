@@ -1,6 +1,6 @@
 const SyncData = require('../models/SyncData');
 const { getUserInfo, getSubmissions, getRatingHistory } = require('../services/codeforces.service');
-const { getLeetCodeStats } = require('../services/leetcode.service');
+const { getLeetCodeStats, getRecentSubmissions } = require('../services/leetcode.service');
 const crypto = require('crypto');
 const User = require('../models/User');
 
@@ -133,4 +133,17 @@ const checkCodeforcesVerification = async (req, res) => {
   }
 };
 
-module.exports = { getCPStats, getCPSubmissions, getLeetCode, getPracticeReview, initCodeforcesVerification, checkCodeforcesVerification };
+const getLeetCodeSubmissions = async (req, res) => {
+  try {
+    const username = req.user.leetcodeUsername;
+    if (!username) {
+      return res.status(400).json({ message: 'LeetCode username not set.' });
+    }
+    const submissions = await getRecentSubmissions(username);
+    res.json(submissions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getCPStats, getCPSubmissions, getLeetCode, getLeetCodeSubmissions, getPracticeReview, initCodeforcesVerification, checkCodeforcesVerification };

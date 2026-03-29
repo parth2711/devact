@@ -42,6 +42,7 @@ function Navbar() {
             <Link to="/github" className={isActive('/github')} onClick={closeMenu}>GitHub</Link>
             <Link to="/cp" className={isActive('/cp')} onClick={closeMenu}>CP</Link>
             <Link to="/repos" className={isActive('/repos')} onClick={closeMenu}>Repos</Link>
+            <Link to="/practice" className={isActive('/practice')} onClick={closeMenu}>Practice</Link>
             <Link to="/profile" className={isActive('/profile')} onClick={closeMenu}>Profile</Link>
             <Link to="/account" className={isActive('/account')} onClick={closeMenu}>Account</Link>
             <button onClick={handleLogout} className="btn btn-secondary btn-sm nav-logout-btn">Logout</button>

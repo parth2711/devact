@@ -1317,3 +1317,57 @@ a.bento-card {
   }
 }
 
+
+/* ── Spinning animation ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+/* ── GitHub Tracker Layout ── */
+.github-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.github-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  text-transform: lowercase;
+  letter-spacing: 0.3px;
+}
+
+@media (max-width: 860px) {
+  .github-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Recharts dark theme tooltips ── */
+.recharts-default-tooltip {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  color: var(--text-primary) !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--text-secondary) !important;
+}
+
+.recharts-tooltip-item {
+  color: var(--text-primary) !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: var(--text-muted) !important;
+}

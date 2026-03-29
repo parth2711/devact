@@ -120,4 +120,51 @@ function formatPayload(event) {
   }
 }
 
-module.exports = { getUserRepos, getUserActivity, getUserStats };
+/**
+ * Get contribution calendar (last 52 weeks) via GitHub GraphQL API.
+ * Requires a GitHub token with read:user scope.
+ */
+async function getContributionCalendar(username, token) {
+  if (!token) return null;
+
+  const query = `
+    query($username: String!) {
+      user(login: $username) {
+        contributionsCollection {
+          contributionCalendar {
+            totalContributions
+            weeks {
+              contributionDays {
+                date
+                contributionCount
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'DevAct',
+    },
+    body: JSON.stringify({ query, variables: { username } }),
+  });
+
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  const calendar = data.data?.user?.contributionsCollection?.contributionCalendar;
+  if (!calendar) return null;
+
+  return {
+    totalContributions: calendar.totalContributions,
+    weeks: calendar.weeks,
+  };
+}
+
+module.exports = { getUserRepos, getUserActivity, getUserStats, getContributionCalendar };
