@@ -146,7 +146,7 @@ function Profile() {
                 title="3-20 lowercase letters, numbers, or underscores"
               />
               {formData.username && (
-                <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                   Your profile URL: <strong>{window.location.origin}/u/{formData.username}</strong>
                 </p>
               )}
@@ -161,7 +161,7 @@ function Profile() {
                 disabled={!formData.username}
                 style={{ width: 'auto' }}
               />
-              <label htmlFor="isPublicProfile" style={{ margin: 0, cursor: formData.username ? 'pointer' : 'not-allowed', color: formData.username ? '#0f172a' : '#94a3b8' }}>
+              <label htmlFor="isPublicProfile" style={{ margin: 0, cursor: formData.username ? 'pointer' : 'not-allowed', color: formData.username ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                 Make my profile public
               </label>
             </div>
@@ -191,7 +191,7 @@ function Profile() {
                 value={formData.githubUsername}
                 onChange={handleChange}
                 disabled={user?.isGithubVerified} // disable if authenticated via oauth to prevent mismatch
-                style={user?.isGithubVerified ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}
+                style={user?.isGithubVerified ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)' } : {}}
               />
             </div>
             <div className="form-group">
@@ -213,10 +213,10 @@ function Profile() {
                 value={formData.codeforcesHandle}
                 onChange={handleChange}
                 disabled={user?.isCodeforcesVerified}
-                style={user?.isCodeforcesVerified ? { backgroundColor: '#f1f5f9', color: '#64748b' } : {}}
+                style={user?.isCodeforcesVerified ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)' } : {}}
               />
               {!user?.isCodeforcesVerified && user?.codeforcesHandle && (
-                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>Save changes, then click Verify to prove ownership.</p>
+                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Save changes, then click Verify to prove ownership.</p>
               )}
             </div>
             <div className="form-group">
@@ -254,7 +254,7 @@ function Profile() {
                 value={formData.stackoverflowId}
                 onChange={handleChange}
               />
-              <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                 Find this in your Stack Overflow profile URL (e.g., stackoverflow.com/users/<strong>22656</strong>/jon-skeet)
               </p>
             </div>
@@ -292,12 +292,12 @@ function Profile() {
 
       {verifyModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: '#fff', padding: '2rem', borderRadius: '12px', maxWidth: '450px', width: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
-            <h3 style={{ margin: '0 0 1rem 0', color: '#0f172a' }}>Verify Codeforces Account</h3>
-            <p style={{ color: '#334155', lineHeight: 1.5, marginBottom: '1.5rem' }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '2rem', borderRadius: '12px', maxWidth: '450px', width: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text-primary)' }}>Verify Codeforces Account</h3>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.5rem' }}>
               To prove ownership of <strong>{user?.codeforcesHandle}</strong>, please temporarily update your Codeforces <strong>First Name</strong> or <strong>Last Name</strong> to the following token:
             </p>
-            <div style={{ background: '#f1f5f9', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontFamily: 'monospace', fontSize: '1.25rem', marginBottom: '1.5rem', border: '1px dashed #cbd5e1', fontWeight: 'bold', color: '#3b82f6' }}>
+            <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontFamily: 'monospace', fontSize: '1.25rem', marginBottom: '1.5rem', border: '1px dashed var(--border-color)', fontWeight: 'bold', color: 'var(--accent-secondary)' }}>
               {verifyToken}
             </div>
             {verifyMessage && (

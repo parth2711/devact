@@ -36,7 +36,7 @@ function PublicProfile() {
   if (loading) {
     return (
       <div className="page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <p style={{ color: '#64748b', fontSize: '1.125rem' }}>Loading profile...</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.125rem' }}>Loading profile...</p>
       </div>
     );
   }
@@ -44,8 +44,8 @@ function PublicProfile() {
   if (notFound) {
     return (
       <div className="page" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '50vh', gap: '1rem' }}>
-        <h2 style={{ color: '#0f172a' }}>User Not Found</h2>
-        <p style={{ color: '#64748b' }}>The user <strong>@{username}</strong> doesn&apos;t exist on DevAct.</p>
+        <h2 style={{ color: 'var(--text-primary)' }}>User Not Found</h2>
+        <p style={{ color: 'var(--text-muted)' }}>The user <strong>@{username}</strong> doesn&apos;t exist on DevAct.</p>
         <Link to="/" className="btn btn-primary">Go Home</Link>
       </div>
     );
@@ -54,8 +54,8 @@ function PublicProfile() {
   if (isPrivate) {
     return (
       <div className="page" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '50vh', gap: '1rem' }}>
-        <h2 style={{ color: '#0f172a' }}>🔒 Private Profile</h2>
-        <p style={{ color: '#64748b' }}>
+        <h2 style={{ color: 'var(--text-primary)' }}>🔒 Private Profile</h2>
+        <p style={{ color: 'var(--text-muted)' }}>
           <strong>@{username}</strong> has chosen to keep their profile private.
         </p>
         <Link to="/" className="btn btn-primary">Go Home</Link>
@@ -74,14 +74,14 @@ function PublicProfile() {
           )}
           <div>
             <h2 style={{ marginBottom: '0.25rem' }}>{profile.name}</h2>
-            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>@{profile.username}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>@{profile.username}</p>
           </div>
         </div>
       </header>
 
       {/* WakaTime Headline Stat */}
       {profile.wakatime?.totalSeconds > 0 && (
-        <div style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           ⏱️ {Math.round(profile.wakatime.totalSeconds / 3600)} hrs coded this week
         </div>
       )}
@@ -125,10 +125,10 @@ function PublicProfile() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             {profile.snapshots[0]?.codeforces?.rating > 0 && (
               <div>
-                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>Codeforces Rating</h4>
+                <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Codeforces Rating</h4>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={profile.snapshots}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
@@ -139,10 +139,10 @@ function PublicProfile() {
             )}
             {profile.snapshots[0]?.leetcode?.totalSolved > 0 && (
               <div>
-                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>LeetCode Solved</h4>
+                <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>LeetCode Solved</h4>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={profile.snapshots}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
@@ -215,8 +215,8 @@ function PublicProfile() {
               Stack Overflow
             </h3>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1rem' }}>
-              <span style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0f172a' }}>{profile.stackoverflow.reputation.toLocaleString()}</span>
-              <span style={{ color: '#64748b', fontSize: '0.875rem' }}>reputation</span>
+              <span style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{profile.stackoverflow.reputation.toLocaleString()}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>reputation</span>
             </div>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
               {profile.stackoverflow.badges.gold > 0 && <span style={{ color: '#f1b600', fontWeight: 600 }}>● {profile.stackoverflow.badges.gold}</span>}
@@ -225,7 +225,7 @@ function PublicProfile() {
             </div>
             {profile.stackoverflow.topAnswers?.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <h4 style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase' }}>Top Answers</h4>
+                <h4 style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Top Answers</h4>
                 {profile.stackoverflow.topAnswers.map((ans, idx) => (
                   <a key={idx} href={ans.link} target="_blank" rel="noreferrer" style={{ fontSize: '0.875rem', color: '#3b82f6', textDecoration: 'none', display: 'flex', gap: '0.5rem' }}>
                     <span style={{ color: '#10b981', fontWeight: 600 }}>+{ans.score}</span> {ans.title}
@@ -247,18 +247,18 @@ function PublicProfile() {
                  <div key={`npm-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                      <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#cb3837', color: 'white', fontWeight: 'bold' }}>npm</span>
-                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>{pkg.name}</span>
+                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>{pkg.name}</span>
                    </div>
-                   <span style={{ fontSize: '0.875rem', color: '#64748b' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
+                   <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
                  </div>
                ))}
                {profile.packages.pypi?.map(pkg => (
                  <div key={`pypi-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                      <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#3776ab', color: 'white', fontWeight: 'bold' }}>PyPI</span>
-                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>{pkg.name}</span>
+                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>{pkg.name}</span>
                    </div>
-                   <span style={{ fontSize: '0.875rem', color: '#64748b' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
+                   <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
                  </div>
                ))}
              </div>
