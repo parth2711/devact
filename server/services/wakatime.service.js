@@ -1,19 +1,16 @@
 const axios = require('axios');
 
 /**
- * Fetch WakaTime stats for the last 7 days using the user's decrypted API key.
- * Converts base64 encoded strings to standard authentication headers if necessary.
  * 
- * @param {String} apiKey - The decrypted WakaTime API key
- * @returns {Object|null}   Returns null if key is invalid, data is empty (lag guard), or request fails.
+ * 
+ * @param {String} apiKey 
+ * @returns {Object|null}  
  */
 const getWakatimeStats = async (apiKey) => {
   if (!apiKey) return null;
 
   try {
-    // WakaTime expects the API key as a Base64-encoded Basic Auth string, OR custom header.
-    // The easiest reliable way is basic auth where username is the api key and password is empty.
-    const token = Buffer.from(apiKey.trim()).toString('base64');
+    const token = Buffer.from(`${apiKey.trim()}:`).toString('base64');
     
     const response = await axios.get('https://wakatime.com/api/v1/users/current/stats/last_7_days', {
       headers: {
@@ -27,7 +24,6 @@ const getWakatimeStats = async (apiKey) => {
       return null;
     }
 
-    // Format languages slightly to keep it clean for the DB cache, only keeping top ones
     const languages = (data.languages || []).slice(0, 10).map((lang) => ({
       name: lang.name,
       percent: lang.percent,
