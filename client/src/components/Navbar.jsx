@@ -43,6 +43,8 @@ function Navbar() {
             <Link to="/cp"         className={isActive('/cp')}         onClick={closeMenu}>CP</Link>
             <Link to="/repos"      className={isActive('/repos')}      onClick={closeMenu}>Repos</Link>
             <Link to="/practice"   className={isActive('/practice')}   onClick={closeMenu}>Practice</Link>
+            <Link to="/contests"   className={isActive('/contests')}   onClick={closeMenu}>Contests</Link>
+            <Link to="/journal"    className={isActive('/journal')}    onClick={closeMenu}>Journal</Link>
             <Link to="/profile"    className={isActive('/profile')}    onClick={closeMenu}>Profile</Link>
             <Link to="/account"    className={isActive('/account')}    onClick={closeMenu}>Account</Link>
             <button onClick={handleLogout} className="nav-logout-btn">Logout</button>

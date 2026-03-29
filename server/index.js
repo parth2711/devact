@@ -39,6 +39,10 @@ const syncRoutes = require('./routes/sync.routes');
 const snapshotRoutes = require('./routes/snapshot.routes');
 const publicRoutes = require('./routes/public.routes');
 const accountRoutes = require('./routes/account.routes');
+const contestsRoutes = require('./routes/contests.routes');
+const streakRoutes = require('./routes/streak.routes');
+const goalsRoutes = require('./routes/goals.routes');
+const journalRoutes = require('./routes/journal.routes');
 const { startSyncCron } = require('./cron/sync.cron');
 
 const app = express();
@@ -76,6 +80,10 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/u', publicRoutes);
 app.use('/api/account', accountRoutes);
+app.use('/api/contests', contestsRoutes);
+app.use('/api/streak', streakRoutes);
+app.use('/api/goals', goalsRoutes);
+app.use('/api/journal', journalRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
