@@ -64,8 +64,8 @@ function ManageAccount() {
   };
 
   const sectionStyle = {
-    background: 'var(--card-bg)',
-    border: '1px solid var(--border)',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border-color)',
     borderRadius: '12px',
     padding: '1.5rem',
     marginBottom: '1.5rem',
@@ -82,7 +82,7 @@ function ManageAccount() {
   };
 
   return (
-    <div className="page profile-page">
+    <div className="page" style={{ maxWidth: '680px' }}>
       <h2 className="page-title">Account Settings</h2>
 
       {/* Account Details */}
@@ -170,7 +170,7 @@ function ManageAccount() {
       </div>
 
       {/* Danger Zone */}
-      <div style={{ ...sectionStyle, border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '12px' }}>
+      <div style={{ ...sectionStyle, border: '1px solid rgba(239, 68, 68, 0.4)' }}>
         <div style={{ ...sectionTitle, color: '#ef4444' }}><Trash2 size={18} /> Danger Zone</div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
           Permanently delete your account, all sync data, and all activity history. This cannot be undone.

@@ -118,7 +118,7 @@ function Dashboard() {
           <p className="dashboard-subtitle">Your developer activity at a glance</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
             Last synced: {formatSyncTime(syncStatus?.lastFullSync || data?.lastSyncedAt)}
           </span>
           <button
@@ -135,14 +135,14 @@ function Dashboard() {
 
       {/* WakaTime Headline Stat */}
       {data?.wakatime?.totalSeconds > 0 && (
-        <div style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           ⏱️ {Math.round(data.wakatime.totalSeconds / 3600)} hrs coded this week
         </div>
       )}
 
       {data?.syncing && (
-        <div className="dashboard-notice" style={{ background: '#eff6ff', borderColor: '#3b82f6' }}>
-          <p style={{ color: '#1e40af' }}>⏳ Initial sync in progress. Your data will appear shortly...</p>
+        <div className="dashboard-notice" style={{ background: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.4)' }}>
+          <p style={{ color: 'var(--accent-secondary)' }}>⏳ Initial sync in progress. Your data will appear shortly...</p>
         </div>
       )}
 
@@ -193,10 +193,10 @@ function Dashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             {snapshots[0]?.codeforces?.rating > 0 && (
               <div>
-                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>Codeforces Rating</h4>
+                <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Codeforces Rating</h4>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={snapshots}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
@@ -207,10 +207,10 @@ function Dashboard() {
             )}
             {snapshots[0]?.leetcode?.totalSolved > 0 && (
               <div>
-                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>LeetCode Solved</h4>
+                <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>LeetCode Solved</h4>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={snapshots}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
@@ -221,10 +221,10 @@ function Dashboard() {
             )}
             {snapshots[0]?.github?.stars > 0 && (
               <div>
-                <h4 style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: '0.5rem' }}>GitHub Stars</h4>
+                <h4 style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>GitHub Stars</h4>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={snapshots}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
@@ -324,14 +324,14 @@ function Dashboard() {
           </div>
         ) : data?.wakatime && data.wakatime.totalSeconds === 0 ? (
           <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>⏱️ No coding activity tracked by WakaTime this week.</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>⏱️ No coding activity tracked by WakaTime this week.</p>
           </div>
         ) : user?.wakatimeConfiguredAt && !data?.wakatime ? (
           <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isStalled(user.wakatimeConfiguredAt) ? (
               <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>WakaTime Sync failed — try manually syncing.</p>
             ) : (
-              <p style={{ color: '#64748b', fontSize: '0.875rem' }} className="spinning">⏳ Syncing WakaTime...</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }} className="spinning">⏳ Syncing WakaTime...</p>
             )}
           </div>
         ) : null}
@@ -344,8 +344,8 @@ function Dashboard() {
               Stack Overflow
             </h3>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '1rem' }}>
-              <span style={{ fontSize: '2rem', fontWeight: 'bold', color: '#0f172a' }}>{data.stackoverflow.reputation.toLocaleString()}</span>
-              <span style={{ color: '#64748b', fontSize: '0.875rem' }}>reputation</span>
+              <span style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{data.stackoverflow.reputation.toLocaleString()}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>reputation</span>
             </div>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
               {data.stackoverflow.badges.gold > 0 && <span style={{ color: '#f1b600', fontWeight: 600 }}>● {data.stackoverflow.badges.gold}</span>}
@@ -354,7 +354,7 @@ function Dashboard() {
             </div>
             {data.stackoverflow.topAnswers?.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <h4 style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase' }}>Top Answers</h4>
+                <h4 style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Top Answers</h4>
                 {data.stackoverflow.topAnswers.map((ans, idx) => (
                   <a key={idx} href={ans.link} target="_blank" rel="noreferrer" style={{ fontSize: '0.875rem', color: '#3b82f6', textDecoration: 'none', display: 'flex', gap: '0.5rem' }}>
                     <span style={{ color: '#10b981', fontWeight: 600 }}>+{ans.score}</span> {ans.title}
@@ -368,7 +368,7 @@ function Dashboard() {
             {isStalled(user.updatedAt) ? (
               <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>Stack Overflow Sync failed.</p>
             ) : (
-              <p style={{ color: '#64748b', fontSize: '0.875rem' }} className="spinning">⏳ Syncing Stack Overflow...</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }} className="spinning">⏳ Syncing Stack Overflow...</p>
             )}
           </div>
         ) : null}
@@ -384,18 +384,18 @@ function Dashboard() {
                  <div key={`npm-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                      <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#cb3837', color: 'white', fontWeight: 'bold' }}>npm</span>
-                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>{pkg.name}</span>
+                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>{pkg.name}</span>
                    </div>
-                   <span style={{ fontSize: '0.875rem', color: '#64748b' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
+                   <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
                  </div>
                ))}
                {data.packages.pypi?.map(pkg => (
                  <div key={`pypi-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                      <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '4px', background: '#3776ab', color: 'white', fontWeight: 'bold' }}>PyPI</span>
-                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155' }}>{pkg.name}</span>
+                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>{pkg.name}</span>
                    </div>
-                   <span style={{ fontSize: '0.875rem', color: '#64748b' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
+                   <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}><strong>{pkg.weeklyDownloads.toLocaleString()}</strong> /wk</span>
                  </div>
                ))}
              </div>
@@ -405,7 +405,7 @@ function Dashboard() {
              {isStalled(user.updatedAt) ? (
               <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>Packages Sync failed.</p>
             ) : (
-              <p style={{ color: '#64748b', fontSize: '0.875rem' }} className="spinning">⏳ Syncing Packages...</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }} className="spinning">⏳ Syncing Packages...</p>
             )}
           </div>
         ) : null}
