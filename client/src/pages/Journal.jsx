@@ -42,8 +42,7 @@ function Journal() {
     }).catch(() => {});
 
     API.get('/journal').then((r) => {
-      // exclude today from history list
-      setHistory(r.data.filter((e) => e.date !== todayStr()));
+      setHistory(r.data);
     }).catch(() => {}).finally(() => setHistLoading(false));
   }, []);
 
@@ -54,6 +53,10 @@ function Journal() {
     try {
       const r = await API.put('/journal/today', { content, mood, tags });
       setTodayEntry(r.data);
+      setHistory(prev => {
+        const others = prev.filter(e => e.date !== r.data.date);
+        return [r.data, ...others].sort((a,b) => b.date.localeCompare(a.date));
+      });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
@@ -70,6 +73,7 @@ function Journal() {
     setContent('');
     setMood('');
     setTags([]);
+    setHistory(prev => prev.filter(e => e.date !== todayStr()));
   };
 
   const addTag = (e) => {
@@ -216,14 +220,14 @@ function Journal() {
         </div>
       </div>
 
-      {/* Past entries */}
-      <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '1rem' }}>Past Entries</h3>
+      {/* Recent entries */}
+      <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '1rem' }}>Recent Entries</h3>
 
       {histLoading && <p className="loading" style={{ padding: '2rem 0' }}>Loading entries...</p>}
 
       {!histLoading && history.length === 0 && (
         <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', textAlign: 'center', padding: '2rem 0' }}>
-          No past entries yet. Start writing daily!
+          No entries yet. Start writing daily!
         </p>
       )}
 
