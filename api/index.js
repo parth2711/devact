@@ -23,6 +23,10 @@ const syncRoutes = require('../server/routes/sync.routes');
 const snapshotRoutes = require('../server/routes/snapshot.routes');
 const publicRoutes = require('../server/routes/public.routes');
 const accountRoutes = require('../server/routes/account.routes');
+const contestsRoutes = require('../server/routes/contests.routes');
+const streakRoutes = require('../server/routes/streak.routes');
+const goalsRoutes = require('../server/routes/goals.routes');
+const journalRoutes = require('../server/routes/journal.routes');
 
 const session = require('express-session');
 const passport = require('../server/config/passport');
@@ -73,6 +77,10 @@ app.use('/api/sync', syncRoutes);
 app.use('/api/snapshots', snapshotRoutes);
 app.use('/api/u', publicRoutes);
 app.use('/api/account', accountRoutes);
+app.use('/api/contests', contestsRoutes);
+app.use('/api/streak', streakRoutes);
+app.use('/api/goals', goalsRoutes);
+app.use('/api/journal', journalRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
