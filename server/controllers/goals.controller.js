@@ -82,8 +82,8 @@ const saveGoals = async (req, res) => {
 
     const doc = await UserGoals.findOneAndUpdate(
       { userId: req.user._id },
-      { goals },
-      { upsert: true, new: true }
+      { $set: { goals } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
     res.json({ goals: doc.goals });

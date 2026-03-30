@@ -44,8 +44,8 @@ const upsertTodayEntry = async (req, res) => {
 
     const entry = await JournalEntry.findOneAndUpdate(
       { userId: req.user._id, date: todayStr() },
-      { content: content.trim(), mood: mood || '', tags: tags || [] },
-      { upsert: true, new: true }
+      { $set: { content: content.trim(), mood: mood || '', tags: tags || [] } },
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
     );
 
     res.json(entry);
