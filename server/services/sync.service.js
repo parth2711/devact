@@ -8,15 +8,10 @@ const { getWakatimeStats } = require('./wakatime.service');
 const { getStackOverflowStats } = require('./stackoverflow.service');
 const { getPackageStats } = require('./packages.service');
 
-/**
- * Sync all external API data for a single user and store in MongoDB.
- * Each platform is wrapped in its own try/catch for graceful partial failure.
- */
 async function syncUserData(userId) {
-  const user = await User.findById(userId);
+  const user = await User.findById(userId).select('+wakatimeApiKey');
   if (!user) throw new Error('User not found');
 
-  // Get existing sync data or create empty
   let syncData = await SyncData.findOne({ userId });
   if (!syncData) {
     syncData = new SyncData({ userId });
@@ -24,7 +19,6 @@ async function syncUserData(userId) {
 
   const now = new Date();
 
-  // --- GitHub ---
   if (user.githubUsername) {
     try {
       const token = process.env.GITHUB_TOKEN;
@@ -39,7 +33,6 @@ async function syncUserData(userId) {
     }
   }
 
-  // --- Codeforces ---
   if (user.codeforcesHandle) {
     try {
       const [userInfo, submissions, ratingHistory] = await Promise.all([
@@ -53,7 +46,6 @@ async function syncUserData(userId) {
     }
   }
 
-  // --- LeetCode ---
   if (user.leetcodeUsername) {
     try {
       const stats = await getLeetCodeStats(user.leetcodeUsername);
@@ -63,7 +55,6 @@ async function syncUserData(userId) {
     }
   }
 
-  // --- New V2.1.0 Platforms ---
   const wakatimeKey = user.getDecryptedWakatimeKey ? user.getDecryptedWakatimeKey() : null;
   const soId = user.stackoverflowId;
   const npmList = user.npmPackages || [];
@@ -100,7 +91,6 @@ async function syncUserData(userId) {
     syncData.packages = { ...pkgRes.value, lastSyncedAt: now };
   }
 
-  // --- Practice Review (cached during sync) ---
   const practiceReviewPromises = [];
   const practiceReviewLabels = [];
 
@@ -142,10 +132,6 @@ async function syncUserData(userId) {
   return syncData;
 }
 
-/**
- * Save a daily snapshot. Uses compound key { userId, date } for dedup.
- * One snapshot per user per day — subsequent syncs on the same day update it.
- */
 async function saveDailySnapshot(userId, syncData) {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
