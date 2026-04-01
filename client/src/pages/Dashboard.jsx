@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
-import { Github, Code2, BarChart2, RefreshCw, TrendingUp, Flame, Plus, Trash2, Check, Trophy } from 'lucide-react';
+import { Github, Code2, BarChart2, RefreshCw, TrendingUp, Flame, Plus, Trash2, Check, Trophy, Clock, FileEdit, BookOpen, Package, Loader } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 
@@ -38,7 +38,7 @@ function StreakWidget() {
       </div>
       {!streak.activeToday && (
         <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.75rem', textAlign: 'center' }}>
-          No activity yet today — commit, submit, or code to keep your streak alive 🔥
+          No activity yet today — commit, submit, or code to keep your streak alive.
         </p>
       )}
     </div>
@@ -165,7 +165,7 @@ function GoalsWidget() {
         </div>
       )}
       {allDone && goals.length > 0 && (
-        <p style={{ fontSize: '0.82rem', color: '#10b981', textAlign: 'center', marginTop: '0.75rem', fontWeight: 600 }}>🎉 All goals done for today!</p>
+        <p style={{ fontSize: '0.82rem', color: '#10b981', textAlign: 'center', marginTop: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}><Check size={14} /> All goals done for today!</p>
       )}
     </div>
   );
@@ -248,7 +248,7 @@ function Dashboard() {
       {/* ── Header ── */}
       <header className="dashboard-header">
         <div>
-          <h2>{greeting}, {user?.name?.split(' ')[0]} 👋</h2>
+          <h2>{greeting}, {user?.name?.split(' ')[0]}</h2>
           <p className="dashboard-subtitle">Your developer activity at a glance</p>
         </div>
         <div className="dashboard-header-actions">
@@ -270,7 +270,7 @@ function Dashboard() {
       {/* ── Notices ── */}
       {data?.syncing && (
         <div className="dashboard-notice" style={{ borderColor: 'rgba(108,142,191,0.3)', background: 'rgba(108,142,191,0.06)' }}>
-          <span style={{ color: 'var(--accent-blue)' }}>⏳ Initial sync in progress — your data will appear shortly.</span>
+          <span style={{ color: 'var(--accent-blue)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Initial sync in progress — your data will appear shortly.</span>
         </div>
       )}
       {!hasAny && (
@@ -289,7 +289,7 @@ function Dashboard() {
       {/* ── WakaTime headline ── */}
       {data?.wakatime?.totalSeconds > 0 && (
         <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ fontSize: '1.4rem' }}>⏱️</span>
+          <Clock size={20} style={{ color: 'var(--text-secondary)' }} />
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 700 }}>
             {Math.round(data.wakatime.totalSeconds / 3600)}h
           </span>
@@ -298,41 +298,71 @@ function Dashboard() {
       )}
 
       {/* ── Stats Row ── */}
-      {data && !data.syncing && (
-        <>
-          <p className="section-label">Overview</p>
-          <div className="stats-grid dashboard-stats">
-            {data.github && (
-              <>
-                <div className="stat-card">
-                  <span className="stat-value">{data.github.repos}</span>
-                  <span className="stat-label">Repositories</span>
+      {data && !data.syncing && (() => {
+        // Compute deltas from snapshots (oldest → newest)
+        const oldest = snapshots.length > 1 ? snapshots[0] : null;
+        const newest = snapshots.length > 1 ? snapshots[snapshots.length - 1] : null;
+        const delta = (newVal, oldVal) => {
+          if (oldVal == null || newVal == null) return null;
+          const d = newVal - oldVal;
+          return d !== 0 ? d : null;
+        };
+        const DeltaBadge = ({ value }) => {
+          if (value == null) return null;
+          const positive = value > 0;
+          return (
+            <span style={{
+              fontSize: '0.68rem', fontWeight: 600, fontFamily: 'var(--font-mono)',
+              color: positive ? '#10b981' : '#ef4444',
+              display: 'inline-flex', alignItems: 'center', gap: '0.15rem',
+              marginTop: '0.3rem',
+            }}>
+              {positive ? '+' : ''}{value}
+              <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>30d</span>
+            </span>
+          );
+        };
+
+        return (
+          <>
+            <p className="section-label">Overview</p>
+            <div className="stats-grid dashboard-stats">
+              {data.github && (
+                <>
+                  <div className="stat-card">
+                    <span className="stat-value">{data.github.repos}</span>
+                    <span className="stat-label">Repositories</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-value">{data.github.totalStars}</span>
+                    <DeltaBadge value={delta(newest?.github?.stars, oldest?.github?.stars)} />
+                    <span className="stat-label">Total Stars</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-value">{data.github.followers}</span>
+                    <span className="stat-label">Followers</span>
+                  </div>
+                </>
+              )}
+              {data.codeforces && (
+                <div className="stat-card blue">
+                  <span className="stat-value">{data.codeforces.rating}</span>
+                  <DeltaBadge value={delta(newest?.codeforces?.rating, oldest?.codeforces?.rating)} />
+                  <span className="stat-label">CF Rating</span>
                 </div>
-                <div className="stat-card">
-                  <span className="stat-value">{data.github.totalStars}</span>
-                  <span className="stat-label">Total Stars</span>
+              )}
+              {data.leetcode && (
+                <div className="stat-card green">
+                  <span className="stat-value">{data.leetcode.totalSolved}</span>
+                  <DeltaBadge value={delta(newest?.leetcode?.totalSolved, oldest?.leetcode?.totalSolved)} />
+                  <span className="stat-label">LC Solved</span>
                 </div>
-                <div className="stat-card">
-                  <span className="stat-value">{data.github.followers}</span>
-                  <span className="stat-label">Followers</span>
-                </div>
-              </>
-            )}
-            {data.codeforces && (
-              <div className="stat-card blue">
-                <span className="stat-value">{data.codeforces.rating}</span>
-                <span className="stat-label">CF Rating</span>
-              </div>
-            )}
-            {data.leetcode && (
-              <div className="stat-card green">
-                <span className="stat-value">{data.leetcode.totalSolved}</span>
-                <span className="stat-label">LC Solved</span>
-              </div>
-            )}
-          </div>
-        </>
-      )}
+              )}
+            </div>
+          </>
+        );
+      })()}
+
 
       {/* ── Trend Charts ── */}
       {hasTrendData && (
@@ -420,24 +450,20 @@ function Dashboard() {
         </Link>
 
         <Link to="/practice" className="dashboard-card dashboard-card-link">
-          <h3>📝 Practice Review</h3>
+          <h3><FileEdit size={18} style={{ color: 'var(--accent-primary)' }} /> Practice Review</h3>
           <p>Review problems you attempted but didn't solve, with editorial links.</p>
-          {user?.codeforcesHandle || user?.leetcodeUsername
-            ? <span className="badge badge-connected">
-                {[user?.codeforcesHandle && `CF: ${user.codeforcesHandle}`, user?.leetcodeUsername && `LC: ${user.leetcodeUsername}`].filter(Boolean).join(' / ')}
-              </span>
-            : <span className="badge">Not Connected</span>}
+          <span className="badge">Review Queue</span>
         </Link>
 
 
         <Link to="/contests" className="dashboard-card dashboard-card-link">
-          <h3>🏆 Contest Calendar</h3>
+          <h3><Trophy size={18} style={{ color: 'var(--warning)' }} /> Contest Calendar</h3>
           <p>Upcoming Codeforces and LeetCode contests with countdowns and register links.</p>
           <span className="badge badge-connected">CF + LC</span>
         </Link>
 
         <Link to="/journal" className="dashboard-card dashboard-card-link">
-          <h3>📓 Dev Journal</h3>
+          <h3><BookOpen size={18} style={{ color: 'var(--accent-blue)' }} /> Dev Journal</h3>
           <p>Log what you worked on each day. Build a personal history of your growth.</p>
           <span className="badge">Daily Log</span>
         </Link>
@@ -471,7 +497,7 @@ function Dashboard() {
         {/* WakaTime */}
         {data?.wakatime && data.wakatime.totalSeconds > 0 ? (
           <div className="dashboard-card">
-            <h3>⏱️ WakaTime Languages</h3>
+            <h3><Clock size={18} style={{ color: 'var(--text-secondary)' }} /> WakaTime Languages</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
               {data.wakatime.languages?.map((lang) => (
                 <div key={lang.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
@@ -485,13 +511,13 @@ function Dashboard() {
           </div>
         ) : data?.wakatime && data.wakatime.totalSeconds === 0 ? (
           <div className="dashboard-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>⏱️ No WakaTime activity this week.</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Clock size={14} /> No WakaTime activity this week.</p>
           </div>
         ) : user?.wakatimeConfiguredAt && !data?.wakatime ? (
           <div className="dashboard-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isStalled(user.wakatimeConfiguredAt)
               ? <p style={{ color: 'var(--error)', fontSize: '0.875rem' }}>WakaTime sync failed — try syncing manually.</p>
-              : <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>⏳ Syncing WakaTime…</p>
+              : <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Syncing WakaTime…</p>
             }
           </div>
         ) : null}
@@ -531,7 +557,7 @@ function Dashboard() {
           <div className="dashboard-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isStalled(user.updatedAt)
               ? <p style={{ color: 'var(--error)', fontSize: '0.875rem' }}>Stack Overflow sync failed.</p>
-              : <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>⏳ Syncing Stack Overflow…</p>
+              : <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Syncing Stack Overflow…</p>
             }
           </div>
         ) : null}
@@ -539,7 +565,7 @@ function Dashboard() {
         {/* Packages */}
         {(data?.packages?.npm?.length > 0 || data?.packages?.pypi?.length > 0) ? (
           <div className="dashboard-card">
-            <h3>📦 Open Source Impact</h3>
+            <h3><Package size={18} style={{ color: 'var(--accent-primary)' }} /> Open Source Impact</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.5rem' }}>
               {data.packages.npm?.map(pkg => (
                 <div key={`npm-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -565,7 +591,7 @@ function Dashboard() {
           <div className="dashboard-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isStalled(user.updatedAt)
               ? <p style={{ color: 'var(--error)', fontSize: '0.875rem' }}>Packages sync failed.</p>
-              : <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>⏳ Syncing packages…</p>
+              : <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Syncing packages…</p>
             }
           </div>
         ) : null}

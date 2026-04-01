@@ -84,7 +84,7 @@ function PracticeReview() {
       {hasNoFailures && (
         <div className="empty-state" style={{ paddingTop: '3rem' }}>
           <Trophy size={48} style={{ color: '#10b981', marginBottom: '1rem' }} />
-          <h3 style={{ color: 'var(--text-primary)' }}>No failed problems found — great work! 🎉</h3>
+          <h3 style={{ color: 'var(--text-primary)' }}>No failed problems found — great work!</h3>
           <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
             Keep solving and your latest attempts will appear here after sync.
           </p>

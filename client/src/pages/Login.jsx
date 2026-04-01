@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Check } from 'lucide-react';
 
 const GithubIcon = () => (
   <svg height="18" viewBox="0 0 16 16" width="18" fill="currentColor">
@@ -49,7 +50,7 @@ function Login() {
           <div className="auth-panel-features">
             {['GitHub activity sync', 'CP ratings & contests', 'Coding time with WakaTime', 'Public developer profile'].map(f => (
               <div className="auth-panel-feature" key={f}>
-                <span className="check">✓</span>
+                <span className="check"><Check size={14} /></span>
                 {f}
               </div>
             ))}

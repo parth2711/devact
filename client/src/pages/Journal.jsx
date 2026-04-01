@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import API from '../api/axios';
-import { BookOpen, Save, Trash2, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Save, Trash2, Tag, ChevronDown, ChevronUp, Check } from 'lucide-react';
 
 const MOODS = [
-  { value: 'great', label: '🚀 Great' },
-  { value: 'good',  label: '😊 Good'  },
-  { value: 'okay',  label: '😐 Okay'  },
-  { value: 'bad',   label: '😩 Rough' },
+  { value: 'great', label: 'Great' },
+  { value: 'good',  label: 'Good'  },
+  { value: 'okay',  label: 'Okay'  },
+  { value: 'bad',   label: 'Rough' },
 ];
 
 function todayStr() {
@@ -215,7 +215,7 @@ function Journal() {
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             <Save size={14} />
-            {saving ? 'Saving...' : saved ? '✓ Saved' : 'Save Entry'}
+            {saving ? 'Saving...' : saved ? <><Check size={14} /> Saved</> : 'Save Entry'}
           </button>
         </div>
       </div>

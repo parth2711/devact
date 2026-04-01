@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
+import { Check } from 'lucide-react';
 
 function Profile() {
   const { user, token, updateProfile } = useAuth();
@@ -176,7 +177,7 @@ function Profile() {
               <label htmlFor="githubUsername" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>GitHub Username</span>
                 {user?.isGithubVerified ? (
-                  <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 600 }}>✓ Verified via OAuth</span>
+                  <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Check size={14} /> Verified via OAuth</span>
                 ) : (
                   <a href={import.meta.env.DEV ? `http://localhost:5000/api/auth/github/connect?token=${token}` : `/api/auth/github/connect?token=${token}`} style={{ color: '#3b82f6', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>
                     Connect Account
@@ -198,7 +199,7 @@ function Profile() {
               <label htmlFor="codeforcesHandle" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>Codeforces Handle</span>
                 {user?.isCodeforcesVerified ? (
-                  <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 600 }}>✓ Verified</span>
+                  <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Check size={14} /> Verified</span>
                 ) : user?.codeforcesHandle && (
                   <button type="button" onClick={handleInitiateVerify} disabled={verifying} style={{ background: 'none', border: 'none', color: '#3b82f6', fontSize: '0.875rem', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
                     Verify Account
