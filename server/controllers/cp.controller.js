@@ -92,6 +92,21 @@ const getPracticeReview = async (req, res) => {
   }
 };
 
+// @desc    Get skill decay data (from cache)
+// @route   GET /api/cp/skills/decay
+// @access  Private
+const getSkillDecay = async (req, res) => {
+  try {
+    const syncData = await SyncData.findOne({ userId: req.user._id });
+    if (!syncData?.skillDecay) {
+      return res.json({ items: [], lastComputedAt: null });
+    }
+    res.json(syncData.skillDecay);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // -- Verification endpoints remain unchanged --
 
 const initCodeforcesVerification = async (req, res) => {
@@ -146,4 +161,4 @@ const getLeetCodeSubmissions = async (req, res) => {
   }
 };
 
-module.exports = { getCPStats, getCPSubmissions, getLeetCode, getLeetCodeSubmissions, getPracticeReview, initCodeforcesVerification, checkCodeforcesVerification };
+module.exports = { getCPStats, getCPSubmissions, getLeetCode, getLeetCodeSubmissions, getPracticeReview, getSkillDecay, initCodeforcesVerification, checkCodeforcesVerification };

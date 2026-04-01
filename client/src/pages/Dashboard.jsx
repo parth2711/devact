@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
-import { Github, Code2, BarChart2, RefreshCw, TrendingUp, Flame, Plus, Trash2, Check, Trophy, Clock, FileEdit, BookOpen, Package, Loader } from 'lucide-react';
+import { Github, Code2, BarChart2, RefreshCw, TrendingUp, Flame, Plus, Trash2, Check, Trophy, Clock, FileEdit, BookOpen, Package, Loader, Ghost } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 
@@ -178,6 +178,7 @@ function Dashboard() {
   const [syncing, setSyncing]           = useState(false);
   const [syncStatus, setSyncStatus]     = useState(null);
   const [snapshots, setSnapshots]       = useState([]);
+  const [shadowMode, setShadowMode]     = useState(false);
 
   useEffect(() => {
     fetchDashboard();
@@ -244,7 +245,7 @@ function Dashboard() {
   if (loading) return <div className="page"><p className="loading">Loading dashboard…</p></div>;
 
   return (
-    <div className="page dashboard-page">
+    <div className={`page dashboard-page ${shadowMode ? 'shadow-mode' : ''}`}>
       {/* ── Header ── */}
       <header className="dashboard-header">
         <div>
@@ -263,6 +264,14 @@ function Dashboard() {
           >
             <RefreshCw size={13} className={syncing ? 'spinning' : ''} />
             {syncing ? 'Syncing…' : 'Sync Now'}
+          </button>
+          <button
+            className={`btn btn-sm ${shadowMode ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ padding: '0.4rem' }}
+            title="Toggle Shadow Board"
+            onClick={() => setShadowMode(!shadowMode)}
+          >
+            <Ghost size={16} />
           </button>
         </div>
       </header>
@@ -325,38 +334,61 @@ function Dashboard() {
 
         return (
           <>
-            <p className="section-label">Overview</p>
+            <p className="section-label">{shadowMode ? 'Anti-Metrics' : 'Overview'}</p>
             <div className="stats-grid dashboard-stats">
-              {data.github && (
+              {shadowMode && data.shadow ? (
                 <>
-                  <div className="stat-card">
-                    <span className="stat-value">{data.github.repos}</span>
-                    <span className="stat-label">Repositories</span>
+                  <div className="stat-card shadow-card">
+                    <span className="stat-value">{data.shadow.longestZeroStreak}</span>
+                    <span className="stat-label">Longest Zero-Commit Streak (Days)</span>
                   </div>
-                  <div className="stat-card">
-                    <span className="stat-value">{data.github.totalStars}</span>
-                    <DeltaBadge value={delta(newest?.github?.stars, oldest?.github?.stars)} />
-                    <span className="stat-label">Total Stars</span>
+                  <div className="stat-card shadow-card" style={{ gridColumn: 'span 2' }}>
+                    <span className="stat-value" style={{ fontSize: '1.2rem', marginBottom: '0.2rem' }}>
+                      {data.shadow.oldestRepo?.name || 'None'}
+                    </span>
+                    <span className="stat-label">
+                      Most Abandoned Repo {data.shadow.oldestRepo?.daysAgo ? `(${data.shadow.oldestRepo.daysAgo} days ago)` : ''}
+                    </span>
                   </div>
-                  <div className="stat-card">
-                    <span className="stat-value">{data.github.followers}</span>
-                    <span className="stat-label">Followers</span>
+                  <div className="stat-card shadow-card">
+                    <span className="stat-value">{data.shadow.lcStruggle}</span>
+                    <span className="stat-label">Recent Failed Submissions</span>
                   </div>
                 </>
-              )}
-              {data.codeforces && (
-                <div className="stat-card blue">
-                  <span className="stat-value">{data.codeforces.rating}</span>
-                  <DeltaBadge value={delta(newest?.codeforces?.rating, oldest?.codeforces?.rating)} />
-                  <span className="stat-label">CF Rating</span>
-                </div>
-              )}
-              {data.leetcode && (
-                <div className="stat-card green">
-                  <span className="stat-value">{data.leetcode.totalSolved}</span>
-                  <DeltaBadge value={delta(newest?.leetcode?.totalSolved, oldest?.leetcode?.totalSolved)} />
-                  <span className="stat-label">LC Solved</span>
-                </div>
+              ) : (
+                <>
+                  {data.github && (
+                    <>
+                      <div className="stat-card">
+                        <span className="stat-value">{data.github.repos}</span>
+                        <span className="stat-label">Repositories</span>
+                      </div>
+                      <div className="stat-card">
+                        <span className="stat-value">{data.github.totalStars}</span>
+                        <DeltaBadge value={delta(newest?.github?.stars, oldest?.github?.stars)} />
+                        <span className="stat-label">Total Stars</span>
+                      </div>
+                      <div className="stat-card">
+                        <span className="stat-value">{data.github.followers}</span>
+                        <span className="stat-label">Followers</span>
+                      </div>
+                    </>
+                  )}
+                  {data.codeforces && (
+                    <div className="stat-card blue">
+                      <span className="stat-value">{data.codeforces.rating}</span>
+                      <DeltaBadge value={delta(newest?.codeforces?.rating, oldest?.codeforces?.rating)} />
+                      <span className="stat-label">CF Rating</span>
+                    </div>
+                  )}
+                  {data.leetcode && (
+                    <div className="stat-card green">
+                      <span className="stat-value">{data.leetcode.totalSolved}</span>
+                      <DeltaBadge value={delta(newest?.leetcode?.totalSolved, oldest?.leetcode?.totalSolved)} />
+                      <span className="stat-label">LC Solved</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </>

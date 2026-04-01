@@ -24,6 +24,7 @@ const getDashboardData = async (req, res) => {
         stackoverflow: null,
         packages: null,
         lastSyncedAt: syncData.lastFullSync,
+        shadow: null,
       };
 
       if (syncData.github?.stats) {
@@ -67,6 +68,36 @@ const getDashboardData = async (req, res) => {
 
       if (syncData.packages?.npm?.length > 0 || syncData.packages?.pypi?.length > 0) {
         data.packages = syncData.packages;
+      }
+
+      // --- Compute Shadow/Anti-Metrics ---
+      data.shadow = { longestZeroStreak: 0, oldestRepo: null, lcStruggle: 0 };
+      
+      if (syncData.github?.calendar?.weeks) {
+        let maxZero = 0;
+        let currentZero = 0;
+        syncData.github.calendar.weeks.forEach(w => {
+          w.contributionDays.forEach(d => {
+            if (d.contributionCount === 0) {
+              currentZero++;
+              maxZero = Math.max(maxZero, currentZero);
+            } else {
+              currentZero = 0;
+            }
+          });
+        });
+        data.shadow.longestZeroStreak = maxZero;
+      }
+      
+      if (syncData.github?.repos?.length > 0) {
+        const oldest = syncData.github.repos.reduce((oldest, r) => 
+          new Date(r.updatedAt) < new Date(oldest.updatedAt) ? r : oldest
+        );
+        data.shadow.oldestRepo = { name: oldest.name, daysAgo: Math.floor((Date.now() - new Date(oldest.updatedAt)) / 86400000) };
+      }
+
+      if (syncData.leetcode?.recentSubmissions?.length > 0) {
+        data.shadow.lcStruggle = syncData.leetcode.recentSubmissions.filter(s => s.status !== 'Accepted').length;
       }
 
       return res.json(data);
