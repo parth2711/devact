@@ -3,7 +3,7 @@ const SyncData = require('../models/SyncData');
 const DailySnapshot = require('../models/DailySnapshot');
 const { getUserStats, getUserRepos, getUserActivity } = require('./github.service');
 const { getUserInfo, getSubmissions, getRatingHistory, getFailedProblems } = require('./codeforces.service');
-const { getLeetCodeStats, getRecentFailedSubmissions } = require('./leetcode.service');
+const { getLeetCodeStats, getRecentFailedSubmissions, getRecentSubmissions } = require('./leetcode.service');
 const { getWakatimeStats } = require('./wakatime.service');
 const { getStackOverflowStats } = require('./stackoverflow.service');
 const { getPackageStats } = require('./packages.service');
@@ -48,8 +48,11 @@ async function syncUserData(userId) {
 
   if (user.leetcodeUsername) {
     try {
-      const stats = await getLeetCodeStats(user.leetcodeUsername);
-      syncData.leetcode = { stats, lastSyncedAt: now };
+      const [stats, recentSubs] = await Promise.all([
+        getLeetCodeStats(user.leetcodeUsername),
+        getRecentSubmissions(user.leetcodeUsername).catch(() => [])
+      ]);
+      syncData.leetcode = { stats, recentSubmissions: recentSubs, lastSyncedAt: now };
     } catch (err) {
       console.error(`[Sync] LeetCode failed for ${user.leetcodeUsername}:`, err.message);
     }
@@ -120,6 +123,81 @@ async function syncUserData(userId) {
 
     prData.failedPlatforms = failedPlatforms;
     syncData.practiceReview = prData;
+  }
+
+  // --- Compute Skill Decay ---
+  try {
+    const lastTouched = new Map();
+
+    if (syncData.github?.repos) {
+      syncData.github.repos.forEach(r => {
+        if (r.language && r.updatedAt) {
+          const key = `lang:${r.language}`;
+          const current = lastTouched.get(key) || 0;
+          lastTouched.set(key, Math.max(current, new Date(r.updatedAt).getTime()));
+        }
+      });
+    }
+
+    if (syncData.leetcode?.recentSubmissions) {
+      syncData.leetcode.recentSubmissions.forEach(sub => {
+        if (sub.lang && sub.submittedAt) {
+          // Normalize lang name slightly if needed, e.g. "python3" -> "Python"
+          let l = sub.lang;
+          if (l === 'python3' || l === 'python') l = 'Python';
+          if (l === 'cpp') l = 'C++';
+          if (l === 'java') l = 'Java';
+          const key = `lang:${l}`;
+          const current = lastTouched.get(key) || 0;
+          lastTouched.set(key, Math.max(current, new Date(sub.submittedAt).getTime()));
+        }
+      });
+    }
+
+    if (syncData.codeforces?.submissions) {
+      syncData.codeforces.submissions.forEach(sub => {
+        if (sub.problem?.tags) {
+          const time = sub.time * 1000;
+          sub.problem.tags.forEach(tag => {
+            const key = `tag:${tag}`;
+            const current = lastTouched.get(key) || 0;
+            lastTouched.set(key, Math.max(current, time));
+          });
+        }
+      });
+    }
+
+    const decayItems = [];
+    const nowTime = now.getTime();
+    for (const [key, ts] of lastTouched.entries()) {
+      const daysSince = Math.floor((nowTime - ts) / (1000 * 60 * 60 * 24));
+      const isTag = key.startsWith('tag:');
+      const name = key.split(':')[1];
+      
+      let rec = '';
+      if (isTag) {
+        rec = `https://codeforces.com/problemset?tags=${encodeURIComponent(name)}`;
+      } else {
+        rec = `https://github.com/search?q=is:open+is:issue+label:"good+first+issue"+language:${encodeURIComponent(name)}`;
+      }
+      
+      decayItems.push({
+        name,
+        type: isTag ? 'tag' : 'language',
+        daysSince,
+        recommendation: rec,
+      });
+    }
+
+    // Sort by daysSince descending (most rusty first)
+    decayItems.sort((a, b) => b.daysSince - a.daysSince);
+
+    syncData.skillDecay = {
+      items: decayItems,
+      lastComputedAt: now,
+    };
+  } catch (err) {
+    console.error(`[Sync] Skill Decay computation failed:`, err.message);
   }
 
   syncData.lastFullSync = now;

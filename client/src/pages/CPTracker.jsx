@@ -2,7 +2,76 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
-import { Star } from 'lucide-react';
+import { Star, Activity } from 'lucide-react';
+
+function SkillDecayWidget({ items }) {
+  if (!items || items.length === 0) return null;
+
+  return (
+    <div className="cp-section">
+      <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <Activity size={20} style={{ color: 'var(--accent)' }}/> 
+        Rusty Skills Monitor
+      </h3>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+        Skills you haven't used recently will begin to fade. Keep them sharp!
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.75rem' }}>
+        {items.map((skill, i) => {
+          const isHealthy = skill.daysSince <= 10;
+          const isDecaying = skill.daysSince > 10 && skill.daysSince <= 30;
+          const isRusty = skill.daysSince > 30;
+          
+          let color = '#10b981'; // green
+          let fillPct = 100;
+          let opacity = 1;
+          
+          if (isDecaying) {
+            color = '#f59e0b'; // yellow
+            fillPct = Math.max(30, 100 - ((skill.daysSince - 10) / 20) * 70);
+            opacity = 0.8;
+          } else if (isRusty) {
+            color = '#ef4444'; // red
+            fillPct = Math.max(5, 30 - ((skill.daysSince - 30) / 30) * 25);
+            opacity = Math.max(0.3, 1 - (skill.daysSince / 100));
+          }
+
+          return (
+            <div key={i} style={{ 
+              display: 'flex', alignItems: 'center', gap: '1rem', 
+              background: 'var(--bg-secondary)', padding: '0.8rem 1rem', 
+              borderRadius: 'var(--r-md)', border: '1px solid var(--border)',
+              opacity, transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = opacity; }}
+            >
+              <div style={{ width: '100px', flexShrink: 0 }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', textTransform: 'capitalize', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={skill.name}>
+                  {skill.name}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                  {skill.type === 'tag' ? 'Tag' : 'Lang'} · {skill.daysSince} days
+                </div>
+              </div>
+
+              <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ width: `${fillPct}%`, height: '100%', background: color, transition: 'width 1s ease' }} />
+              </div>
+
+              {skill.daysSince > 10 && (
+                <a href={skill.recommendation} target="_blank" rel="noopener noreferrer" 
+                   className="btn btn-primary btn-sm" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', flexShrink: 0 }}>
+                  Refresh
+                </a>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function CPTracker() {
   const { user } = useAuth();
@@ -10,6 +79,7 @@ function CPTracker() {
   const [cfSubmissions, setCfSubmissions] = useState([]);
   const [lcStats, setLcStats] = useState(null);
   const [lcSubmissions, setLcSubmissions] = useState([]);
+  const [skillDecay, setSkillDecay] = useState({ items: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -41,6 +111,10 @@ function CPTracker() {
           API.get('/cp/leetcode/submissions').then((r) => setLcSubmissions(r.data)).catch(() => {})
         );
       }
+
+      promises.push(
+        API.get('/cp/skills/decay').then(r => setSkillDecay(r.data)).catch(() => {})
+      );
 
       await Promise.allSettled(promises);
     } catch (err) {
@@ -219,6 +293,9 @@ function CPTracker() {
           )}
         </>
       )}
+
+      {/* Rusty Skills Monitor */}
+      <SkillDecayWidget items={skillDecay.items} />
     </div>
   );
 }

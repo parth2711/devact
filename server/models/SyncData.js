@@ -100,6 +100,15 @@ const syncDataSchema = new mongoose.Schema(
       failedPlatforms: { type: [String], default: [] },
       lastSyncedAt: { type: Date, default: null },
     },
+    skillDecay: {
+      items: [{
+        name: String,
+        type: { type: String }, // 'language' or 'tag'
+        daysSince: Number,
+        recommendation: String,
+      }],
+      lastComputedAt: { type: Date, default: null },
+    },
     lastFullSync: {
       type: Date,
       default: null,
