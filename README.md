@@ -20,6 +20,8 @@ Built with the MERN stack (MongoDB, Express, React, Node.js).
 | **Stack Overflow** | Reputation, badges, and top answers |
 | **npm / PyPI Packages** | Weekly download stats for your open-source packages |
 | **Trend Charts** | 30-day history charts for ratings, solved count, and GitHub stars |
+| **Shadow Dashboard** | Toggle into the "Shadow Board" to view anti-metrics like longest zero-commit streak and abandoned repos |
+| **Skill Decay Monitor** | Track languages and CP tags you haven't touched in >30 days and discover quick refresher tasks |
 | **Public Profile** | Shareable developer profile at `/u/:username` |
 | **Authentication** | JWT-based login, registration, and GitHub OAuth |
 
