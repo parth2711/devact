@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
+import { Star } from 'lucide-react';
 
 function CPTracker() {
   const { user } = useAuth();
@@ -139,7 +140,7 @@ function CPTracker() {
                         {sub.problem.index}. {sub.problem.name}
                       </span>
                       {sub.problem.rating && (
-                        <span className="submission-difficulty">★ {sub.problem.rating}</span>
+                        <span className="submission-difficulty" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}><Star size={12} /> {sub.problem.rating}</span>
                       )}
                     </div>
                     <div className="submission-meta">

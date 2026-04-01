@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import ReactMarkdown from 'react-markdown';
-import { Globe, Lock, FileText, Folder, Star, GitFork, Users, CircleAlert } from 'lucide-react';
+import { Globe, Lock, FileText, Folder, Star, GitFork, Users, CircleAlert, Sparkles, XCircle } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
@@ -139,7 +139,7 @@ function RepoVisualizer() {
       const res = await API.post(`/repos/${owner}/${selectedRepo.name}/feedback`);
       setAiFeedback(res.data.feedback);
     } catch (err) {
-      setAiFeedback('❌ failed to generate insights. please check your server logs.');
+      setAiFeedback('Failed to generate insights. Please check your server logs.');
     } finally {
       setGeneratingAI(false);
     }
@@ -253,7 +253,7 @@ function RepoVisualizer() {
                 disabled={generatingAI}
                 className="ai-btn"
               >
-                {generatingAI ? '✨ analyzing architecture...' : '✨ generate ai insights'}
+                {generatingAI ? <><Sparkles size={16} /> analyzing architecture...</> : <><Sparkles size={16} /> generate ai insights</>}
               </button>
             </div>
           </div>
@@ -261,7 +261,7 @@ function RepoVisualizer() {
           {/* ai feedback section */}
           {aiFeedback && (
             <div className="bento-card ai-insights-card" style={{ gridColumn: '1 / -1' }}>
-              <h4 className="chart-title ai-title">✨ ai personalized feedback</h4>
+              <h4 className="chart-title ai-title" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Sparkles size={16} /> ai personalized feedback</h4>
               <div className="ai-markdown">
                 <ReactMarkdown>{aiFeedback}</ReactMarkdown>
               </div>

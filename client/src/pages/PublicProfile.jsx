@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Lock, TrendingUp, Package, Clock } from 'lucide-react';
 
 function PublicProfile() {
   const { username } = useParams();
@@ -54,7 +55,7 @@ function PublicProfile() {
   if (isPrivate) {
     return (
       <div className="page" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '50vh', gap: '1rem' }}>
-        <h2 style={{ color: 'var(--text-primary)' }}>🔒 Private Profile</h2>
+        <h2 style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Lock size={20} /> Private Profile</h2>
         <p style={{ color: 'var(--text-muted)' }}>
           <strong>@{username}</strong> has chosen to keep their profile private.
         </p>
@@ -82,7 +83,7 @@ function PublicProfile() {
       {/* WakaTime Headline Stat */}
       {profile.wakatime?.totalSeconds > 0 && (
         <div style={{ marginBottom: '1.5rem', fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          ⏱️ {Math.round(profile.wakatime.totalSeconds / 3600)} hrs coded this week
+          <Clock size={20} style={{ color: 'var(--text-secondary)' }} /> {Math.round(profile.wakatime.totalSeconds / 3600)} hrs coded this week
         </div>
       )}
 
@@ -121,7 +122,7 @@ function PublicProfile() {
       {/* Trend Charts */}
       {hasTrendData && (
         <div className="dashboard-card" style={{ marginTop: '2rem', padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>📈 Activity Trends</h3>
+          <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingUp size={18} /> Activity Trends</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             {profile.snapshots[0]?.codeforces?.rating > 0 && (
               <div>
@@ -194,7 +195,7 @@ function PublicProfile() {
         {profile.wakatime?.totalSeconds > 0 && (
           <div className="dashboard-card" style={{ padding: '1.5rem' }}>
             <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              ⏱️ WakaTime Languages
+              <Clock size={18} style={{ color: 'var(--text-secondary)' }} /> WakaTime Languages
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {profile.wakatime.languages?.map((lang) => (
@@ -240,7 +241,7 @@ function PublicProfile() {
         {(profile.packages?.npm?.length > 0 || profile.packages?.pypi?.length > 0) && (
            <div className="dashboard-card" style={{ padding: '1.5rem' }}>
              <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-               📦 Open Source Impact
+               <Package size={18} style={{ color: 'var(--accent-primary)' }} /> Open Source Impact
              </h3>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                {profile.packages.npm?.map(pkg => (
