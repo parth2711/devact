@@ -1,6 +1,40 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
+import { CheckCircle, Circle, ExternalLink } from 'lucide-react';
+
+function SetupProgress({ user, formData }) {
+  const steps = [
+    { label: 'GitHub',     done: !!(formData.githubUsername   || user?.githubUsername)   },
+    { label: 'Codeforces', done: !!(formData.codeforcesHandle || user?.codeforcesHandle) },
+    { label: 'LeetCode',   done: !!(formData.leetcodeUsername || user?.leetcodeUsername) },
+    { label: 'WakaTime',   done: !!user?.wakatimeConfiguredAt },
+    { label: 'Public URL', done: !!(formData.username         || user?.username)         },
+  ];
+  const done  = steps.filter(s => s.done).length;
+  const total = steps.length;
+  const pct   = Math.round((done / total) * 100);
+  return (
+    <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Profile setup</span>
+        <span style={{ fontSize: '0.8rem', color: pct === 100 ? '#10b981' : 'var(--text-muted)', fontWeight: 600 }}>{done}/{total} connected</span>
+      </div>
+      <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px', marginBottom: '0.75rem' }}>
+        <div style={{ width: `${pct}%`, height: '100%', borderRadius: '2px', background: pct === 100 ? '#10b981' : 'var(--accent)', transition: 'width 0.4s ease' }} />
+      </div>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        {steps.map(s => (
+          <span key={s.label} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', fontWeight: 600, color: s.done ? '#10b981' : 'var(--text-muted)' }}>
+            {s.done ? <CheckCircle size={11} /> : <Circle size={11} />}{s.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
 import { Check } from 'lucide-react';
 
 function Profile() {
@@ -66,7 +100,7 @@ function Profile() {
 
     try {
       await updateProfile(payload);
-      setStatus({ type: 'success', message: 'Profile updated successfully!' });
+      setStatus({ type: 'success', message: 'Saved! Sync now to pull fresh data.' });
     } catch (err) {
       setStatus({ type: 'error', message: err.response?.data?.message || 'Update failed' });
     } finally {
@@ -108,7 +142,9 @@ function Profile() {
     <div className="page profile-page">
       <div className="profile-card">
         <h2>Profile Settings</h2>
-        <p className="profile-subtitle">Connect your accounts to unlock tracking features</p>
+        <p className="profile-subtitle">Connect your accounts to start tracking</p>
+
+        <SetupProgress user={user} formData={formData} />
 
         {status.message && (
           <p className={status.type === 'success' ? 'success-msg' : 'error-msg'}>
@@ -140,7 +176,7 @@ function Profile() {
                 id="username"
                 type="text"
                 name="username"
-                placeholder="e.g. johndoe"
+                placeholder="pick a handle — lowercase, no spaces"
                 value={formData.username}
                 onChange={handleChange}
                 pattern="[a-z0-9_]{3,20}"
@@ -188,7 +224,7 @@ function Profile() {
                 id="githubUsername"
                 type="text"
                 name="githubUsername"
-                placeholder="e.g. octocat"
+                placeholder="your GitHub username"
                 value={formData.githubUsername}
                 onChange={handleChange}
                 disabled={user?.isGithubVerified} // disable if authenticated via oauth to prevent mismatch
@@ -210,14 +246,14 @@ function Profile() {
                 id="codeforcesHandle"
                 type="text"
                 name="codeforcesHandle"
-                placeholder="e.g. tourist"
+                placeholder="your Codeforces handle"
                 value={formData.codeforcesHandle}
                 onChange={handleChange}
                 disabled={user?.isCodeforcesVerified}
                 style={user?.isCodeforcesVerified ? { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)' } : {}}
               />
               {!user?.isCodeforcesVerified && user?.codeforcesHandle && (
-                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Save changes, then click Verify to prove ownership.</p>
+                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Save first, then verify ownership to unlock full tracking.</p>
               )}
             </div>
             <div className="form-group">
@@ -226,19 +262,25 @@ function Profile() {
                 id="leetcodeUsername"
                 type="text"
                 name="leetcodeUsername"
-                placeholder="e.g. lee215"
+                placeholder="your LeetCode username"
                 value={formData.leetcodeUsername}
                 onChange={handleChange}
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="wakatimeApiKey">WakaTime API Key</label>
+              <label htmlFor="wakatimeApiKey" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>WakaTime API Key</span>
+                <a href="https://wakatime.com/settings/account" target="_blank" rel="noreferrer"
+                  style={{ color: 'var(--accent-blue)', fontSize: '0.78rem', textDecoration: 'none', fontWeight: 600 }}>
+                  Get key →
+                </a>
+              </label>
               <input
                 id="wakatimeApiKey"
                 type="password"
                 name="wakatimeApiKey"
-                placeholder={user?.wakatimeConfiguredAt ? 'Key is configured (hidden). Type to replace.' : 'Paste your Secret API Key'}
+                placeholder={user?.wakatimeConfiguredAt ? 'Key saved — type to replace' : 'Paste your secret API key here'}
                 autoComplete="new-password"
                 value={formData.wakatimeApiKey === undefined ? '' : formData.wakatimeApiKey}
                 onChange={handleChange}
@@ -251,34 +293,34 @@ function Profile() {
                 id="stackoverflowId"
                 type="text"
                 name="stackoverflowId"
-                placeholder="e.g. 22656"
+                placeholder="numeric ID from your profile URL"
                 value={formData.stackoverflowId}
                 onChange={handleChange}
               />
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                Find this in your Stack Overflow profile URL (e.g., stackoverflow.com/users/<strong>22656</strong>/jon-skeet)
+                Open your SO profile — the number in the URL is your ID: stackoverflow.com/users/<strong>12345678</strong>/your-name
               </p>
             </div>
 
             <div className="form-group">
-              <label htmlFor="npmPackages">npm Packages (max 10, comma-separated)</label>
+              <label htmlFor="npmPackages">npm Packages</label>
               <input
                 id="npmPackages"
                 type="text"
                 name="npmPackages"
-                placeholder="e.g. react, lodash, express"
+                placeholder="package names, comma separated"
                 value={formData.npmPackages}
                 onChange={handleChange}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="pypiPackages">PyPI Packages (max 10, comma-separated)</label>
+              <label htmlFor="pypiPackages">PyPI Packages</label>
               <input
                 id="pypiPackages"
                 type="text"
                 name="pypiPackages"
-                placeholder="e.g. requests, numpy, django"
+                placeholder="package names, comma separated"
                 value={formData.pypiPackages}
                 onChange={handleChange}
               />

@@ -69,7 +69,7 @@ function Login() {
               <label htmlFor="email">Email</label>
               <input
                 id="email" type="email" name="email"
-                placeholder="you@example.com"
+                placeholder="email address"
                 value={formData.email} onChange={handleChange} required
               />
             </div>
@@ -80,7 +80,7 @@ function Login() {
               </label>
               <input
                 id="password" type="password" name="password"
-                placeholder="••••••••"
+                placeholder="password"
                 value={formData.password} onChange={handleChange} required
               />
             </div>

@@ -141,7 +141,7 @@ function Journal() {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="What did you work on today? Any problems solved, concepts learned, or blockers hit?"
+          placeholder="What did you build, break, or figure out today?"
           rows={5}
           maxLength={2000}
           style={{
@@ -190,7 +190,7 @@ function Journal() {
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={addTag}
-            placeholder="Add tags (press Enter) — e.g. leetcode, graphs, dp"
+            placeholder="tag it — press Enter to add (e.g. graphs, contest, debug)"
             style={{
               width: '100%',
               background: 'var(--bg-secondary)',
