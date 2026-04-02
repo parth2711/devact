@@ -67,7 +67,7 @@ function Register() {
               <label htmlFor="name">Full Name</label>
               <input
                 id="name" type="text" name="name"
-                placeholder="Your name"
+                placeholder="full name"
                 value={formData.name} onChange={handleChange} required
               />
             </div>
@@ -75,7 +75,7 @@ function Register() {
               <label htmlFor="email">Email</label>
               <input
                 id="email" type="email" name="email"
-                placeholder="you@example.com"
+                placeholder="email address"
                 value={formData.email} onChange={handleChange} required
               />
             </div>
@@ -83,7 +83,7 @@ function Register() {
               <label htmlFor="password">Password</label>
               <input
                 id="password" type="password" name="password"
-                placeholder="Min. 6 characters"
+                placeholder="password"
                 value={formData.password} onChange={handleChange} required minLength={6}
               />
             </div>

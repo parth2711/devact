@@ -158,7 +158,7 @@ function GoalsWidget() {
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <input ref={inputRef} value={customLabel} onChange={e => setCustomLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCustom()}
-              placeholder="Or type a custom goal…"
+              placeholder="write your own goal…"
               style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.85rem', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'inherit', outline: 'none' }} />
             <button className="btn btn-primary btn-sm" onClick={addCustom} disabled={!customLabel.trim()}>Add</button>
           </div>
@@ -283,8 +283,45 @@ function Dashboard() {
         </div>
       )}
       {!hasAny && (
-        <div className="dashboard-notice">
-          Connect your accounts in <Link to="/profile">Profile</Link> to see real data here.
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '14px',
+          padding: '1.5rem',
+          marginBottom: '1.5rem',
+        }}>
+          <p style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.35rem' }}>Get started — connect your accounts</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+            DevAct can't show you anything until it knows where to pull data from.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {[
+              { icon: '🐙', label: 'GitHub username',    done: !!user?.githubUsername,      desc: 'Commits, repos, stars' },
+              { icon: '💙', label: 'Codeforces handle',  done: !!user?.codeforcesHandle,    desc: 'Rating, contests, submissions' },
+              { icon: '🟡', label: 'LeetCode username',  done: !!user?.leetcodeUsername,    desc: 'Problems solved, ranking' },
+              { icon: '⏱️', label: 'WakaTime API key',   done: !!user?.wakatimeConfiguredAt, desc: 'Coding hours per language' },
+            ].map(({ icon, label, done, desc }) => (
+              <div key={label} style={{
+                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                padding: '0.6rem 0.85rem',
+                background: done ? 'rgba(16,185,129,0.06)' : 'var(--bg-secondary)',
+                border: `1px solid ${done ? 'rgba(16,185,129,0.2)' : 'var(--border-color)'}`,
+                borderRadius: '8px',
+                opacity: done ? 0.75 : 1,
+              }}>
+                <span style={{ fontSize: '1rem', flexShrink: 0 }}>{icon}</span>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: done ? '#10b981' : 'var(--text-primary)' }}>
+                    {done ? '✓ ' : ''}{label}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>{desc}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Link to="/profile" className="btn btn-primary" style={{ display: 'inline-flex', marginTop: '1.25rem', fontSize: '0.88rem' }}>
+            Set up my profile →
+          </Link>
         </div>
       )}
 
