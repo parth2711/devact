@@ -6,7 +6,11 @@ const SyncData = require('../models/SyncData');
  * Activity = GitHub commit, CF/LC submission, or WakaTime coding session.
  */
 function dateStr(date) {
-  return date.toISOString().split('T')[0];
+  // Use local date, not UTC — prevents off-by-one for users in UTC+ timezones
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 async function getStreakData(userId) {

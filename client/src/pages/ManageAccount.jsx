@@ -65,7 +65,7 @@ function ManageAccount() {
 
   const sectionStyle = {
     background: 'var(--bg-card)',
-    border: '1px solid var(--border-color)',
+    border: '1px solid var(--border)',
     borderRadius: '12px',
     padding: '1.5rem',
     marginBottom: '1.5rem',
@@ -163,7 +163,7 @@ function ManageAccount() {
                   {value || <em style={{ opacity: 0.5 }}>Not connected</em>}
                 </span>
               </div>
-              <Link to={path} style={{ color: 'var(--accent-primary)', fontSize: '0.8rem', textDecoration: 'none' }}>Manage →</Link>
+              <Link to={path} style={{ color: 'var(--accent)', fontSize: '0.8rem', textDecoration: 'none' }}>Manage →</Link>
             </div>
           ))}
         </div>
@@ -193,7 +193,7 @@ function ManageAccount() {
           zIndex: 1000, padding: '1rem',
         }}>
           <div style={{
-            background: 'var(--card-bg)',
+            background: 'var(--bg-card)',
             border: '1px solid rgba(239,68,68,0.4)',
             borderRadius: '16px',
             padding: '2rem',
@@ -217,7 +217,7 @@ function ManageAccount() {
               <input
                 className="form-input"
                 type="password"
-                placeholder="Your password"
+                placeholder="enter password to confirm"
                 value={deletePwd}
                 onChange={(e) => setDeletePwd(e.target.value)}
                 autoFocus

@@ -31,6 +31,8 @@ function Journal() {
   const [histLoading, setHistLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
 
+  const [saveError, setSaveError] = useState('');
+
   useEffect(() => {
     API.get('/journal/today').then((r) => {
       if (r.data) {
@@ -57,10 +59,11 @@ function Journal() {
         const others = prev.filter(e => e.date !== r.data.date);
         return [r.data, ...others].sort((a,b) => b.date.localeCompare(a.date));
       });
+      setSaveError('');
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to save');
+      setSaveError(err.response?.data?.message || 'Failed to save — try again.');
     } finally {
       setSaving(false);
     }
@@ -99,7 +102,7 @@ function Journal() {
       {/* Today's entry */}
       <div style={{
         background: 'var(--bg-card)',
-        border: '1px solid var(--border-color)',
+        border: '1px solid var(--border)',
         borderRadius: '16px',
         padding: '1.5rem',
         marginBottom: '2rem',
@@ -122,8 +125,8 @@ function Journal() {
               key={m.value}
               onClick={() => setMood(mood === m.value ? '' : m.value)}
               style={{
-                background: mood === m.value ? 'rgba(168,85,247,0.15)' : 'var(--bg-secondary)',
-                border: `1px solid ${mood === m.value ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+                background: mood === m.value ? 'rgba(168,85,247,0.15)' : 'var(--bg-surface)',
+                border: `1px solid ${mood === m.value ? 'var(--accent)' : 'var(--border)'}`,
                 borderRadius: '20px',
                 padding: '0.3rem 0.8rem',
                 fontSize: '0.8rem',
@@ -146,8 +149,8 @@ function Journal() {
           maxLength={2000}
           style={{
             width: '100%',
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-color)',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
             borderRadius: '10px',
             padding: '0.85rem 1rem',
             color: 'var(--text-primary)',
@@ -159,8 +162,8 @@ function Journal() {
             boxSizing: 'border-box',
             transition: 'border-color 0.2s',
           }}
-          onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
-          onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
         />
         <div style={{ textAlign: 'right', fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
           {content.length}/2000
@@ -176,13 +179,13 @@ function Journal() {
                 borderRadius: '20px',
                 padding: '0.2rem 0.65rem',
                 fontSize: '0.75rem',
-                color: 'var(--accent-primary)',
+                color: 'var(--accent)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.3rem',
               }}>
                 <Tag size={10} /> {t}
-                <button onClick={() => removeTag(t)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-primary)', padding: 0, lineHeight: 1 }}>×</button>
+                <button onClick={() => removeTag(t)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', padding: 0, lineHeight: 1 }}>×</button>
               </span>
             ))}
           </div>
@@ -193,8 +196,8 @@ function Journal() {
             placeholder="tag it — press Enter to add (e.g. graphs, contest, debug)"
             style={{
               width: '100%',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
               padding: '0.5rem 0.85rem',
               color: 'var(--text-primary)',
@@ -206,6 +209,9 @@ function Journal() {
           />
         </div>
 
+        {saveError && (
+          <p style={{ color: 'var(--error)', fontSize: '0.82rem', textAlign: 'right', marginTop: '0.5rem' }}>{saveError}</p>
+        )}
         {/* Save button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
           <button
@@ -239,7 +245,7 @@ function Journal() {
               key={entry._id}
               style={{
                 background: 'var(--bg-card)',
-                border: '1px solid var(--border-color)',
+                border: '1px solid var(--border)',
                 borderRadius: '12px',
                 overflow: 'hidden',
               }}
@@ -276,7 +282,7 @@ function Journal() {
                   color: 'var(--text-secondary)',
                   fontSize: '0.88rem',
                   lineHeight: 1.7,
-                  borderTop: '1px solid var(--border-color)',
+                  borderTop: '1px solid var(--border)',
                   paddingTop: '0.9rem',
                   whiteSpace: 'pre-wrap',
                 }}>
