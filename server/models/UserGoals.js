@@ -6,19 +6,26 @@ const goalSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      unique: true,  // one goals doc per user
+      unique: true,
     },
     goals: [
       {
-        id: { type: String, required: true },          // client-generated uuid
-        label: { type: String, required: true },        // "Solve 2 LC problems"
+        id:    { type: String, required: true },
+        label: { type: String, required: true },
         type: {
           type: String,
           enum: ['lc_solved', 'cf_submitted', 'waka_hours', 'github_commits', 'custom'],
           default: 'custom',
         },
-        target: { type: Number, default: 1 },           // numeric target (e.g. 2 problems)
+        target:  { type: Number,  default: 1    },
         enabled: { type: Boolean, default: true },
+      },
+    ],
+    // Persisted done state for custom goals per day — pruned after 7 days
+    customDone: [
+      {
+        goalId: { type: String, required: true },
+        date:   { type: String, required: true }, // YYYY-MM-DD
       },
     ],
   },

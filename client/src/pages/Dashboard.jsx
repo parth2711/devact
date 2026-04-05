@@ -87,7 +87,16 @@ function GoalsWidget() {
   };
 
   const removeGoal = async (id) => { const u = goals.filter(g => g.id !== id); setGoals(u); await persist(u); };
-  const toggleDone = (id) => setGoals(goals.map(g => g.id === id ? { ...g, done: !g.done } : g));
+  const toggleDone = async (id) => {
+    // Optimistic update
+    setGoals(goals.map(g => g.id === id ? { ...g, done: !g.done } : g));
+    try {
+      await API.patch(`/goals/${id}/toggle`);
+    } catch {
+      // Revert on failure
+      setGoals(goals.map(g => g.id === id ? { ...g, done: !g.done } : g));
+    }
+  };
 
   const doneCount = goals.filter(g => g.done || (g.type !== 'custom' && (g.current || 0) >= g.target)).length;
   const allDone   = goals.length > 0 && doneCount === goals.length;
@@ -98,16 +107,16 @@ function GoalsWidget() {
     <div className="dashboard-card" style={{ padding: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
         <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-          <Trophy size={18} style={{ color: allDone ? '#10b981' : 'var(--accent-primary)' }} />
+          <Trophy size={18} style={{ color: allDone ? '#10b981' : 'var(--accent)' }} />
           Today's Goals
           {goals.length > 0 && (
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, background: allDone ? 'rgba(16,185,129,0.15)' : 'rgba(168,85,247,0.15)', color: allDone ? '#10b981' : 'var(--accent-primary)', borderRadius: '20px', padding: '0.15rem 0.6rem' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, background: allDone ? 'rgba(16,185,129,0.15)' : 'rgba(168,85,247,0.15)', color: allDone ? '#10b981' : 'var(--accent)', borderRadius: '20px', padding: '0.15rem 0.6rem' }}>
               {doneCount}/{goals.length}
             </span>
           )}
         </h3>
         <button onClick={() => { setAdding(!adding); setTimeout(() => inputRef.current?.focus(), 50); }}
-          style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.3rem 0.6rem', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem' }}>
+          style={{ background: 'none', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.3rem 0.6rem', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem' }}>
           <Plus size={13} /> Add
         </button>
       </div>
@@ -121,17 +130,17 @@ function GoalsWidget() {
           const pct = g.type === 'custom' ? (g.done ? 100 : 0) : Math.min(100, Math.round(((g.current || 0) / g.target) * 100));
           const isDone = g.done || pct >= 100;
           return (
-            <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.8rem', background: isDone ? 'rgba(16,185,129,0.06)' : 'var(--bg-secondary)', borderRadius: '8px', border: `1px solid ${isDone ? 'rgba(16,185,129,0.25)' : 'var(--border-color)'}`, transition: 'all 0.2s' }}>
+            <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.8rem', background: isDone ? 'rgba(16,185,129,0.06)' : 'var(--bg-surface)', borderRadius: '8px', border: `1px solid ${isDone ? 'rgba(16,185,129,0.25)' : 'var(--border)'}`, transition: 'all 0.2s' }}>
               <button onClick={() => g.type === 'custom' && toggleDone(g.id)}
-                style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isDone ? '#10b981' : 'var(--border-color)'}`, background: isDone ? '#10b981' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: g.type === 'custom' ? 'pointer' : 'default', transition: 'all 0.2s' }}>
+                style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${isDone ? '#10b981' : 'var(--border)'}`, background: isDone ? '#10b981' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: g.type === 'custom' ? 'pointer' : 'default', transition: 'all 0.2s' }}>
                 {isDone && <Check size={10} color="#fff" strokeWidth={3} />}
               </button>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '0.85rem', fontWeight: 500, color: isDone ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: isDone ? 'line-through' : 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{g.label}</div>
                 {g.type !== 'custom' && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.3rem' }}>
-                    <div style={{ flex: 1, height: '3px', background: 'var(--border-color)', borderRadius: '2px' }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: isDone ? '#10b981' : 'var(--accent-primary)', borderRadius: '2px', transition: 'width 0.4s ease' }} />
+                    <div style={{ flex: 1, height: '3px', background: 'var(--border)', borderRadius: '2px' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: isDone ? '#10b981' : 'var(--accent)', borderRadius: '2px', transition: 'width 0.4s ease' }} />
                     </div>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', flexShrink: 0 }}>{g.current || 0}/{g.target}</span>
                   </div>
@@ -146,12 +155,12 @@ function GoalsWidget() {
       </div>
 
       {adding && (
-        <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '1rem' }}>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Quick Add</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem' }}>
             {GOAL_PRESETS.map(p => (
               <button key={p.label} onClick={() => addPreset(p)}
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '0.3rem 0.8rem', fontSize: '0.78rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '0.3rem 0.8rem', fontSize: '0.78rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                 {p.label}
               </button>
             ))}
@@ -159,7 +168,7 @@ function GoalsWidget() {
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <input ref={inputRef} value={customLabel} onChange={e => setCustomLabel(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCustom()}
               placeholder="write your own goal…"
-              style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.85rem', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'inherit', outline: 'none' }} />
+              style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem 0.85rem', color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: 'inherit', outline: 'none' }} />
             <button className="btn btn-primary btn-sm" onClick={addCustom} disabled={!customLabel.trim()}>Add</button>
           </div>
         </div>
@@ -178,6 +187,7 @@ function Dashboard() {
   const [syncing, setSyncing]           = useState(false);
   const [syncStatus, setSyncStatus]     = useState(null);
   const [snapshots, setSnapshots]       = useState([]);
+  const [syncError, setSyncError] = useState('');
   const [shadowMode, setShadowMode]     = useState(false);
 
   useEffect(() => {
@@ -208,6 +218,7 @@ function Dashboard() {
   const handleSyncNow = async () => {
     setSyncing(true);
     try {
+      setSyncError('');
       await API.post('/sync/now');
       const initialSyncTime = syncStatus?.lastFullSync;
       const poll = setInterval(async () => {
@@ -224,7 +235,7 @@ function Dashboard() {
       }, 3000);
       setTimeout(() => { clearInterval(poll); setSyncing(false); }, 30000);
     } catch (err) {
-      alert(err.response?.data?.message || 'Sync failed');
+      setSyncError(err.response?.data?.message || 'Sync failed — try again.');
       setSyncing(false);
     }
   };
@@ -277,6 +288,11 @@ function Dashboard() {
       </header>
 
       {/* ── Notices ── */}
+      {syncError && (
+        <div className="dashboard-notice" style={{ borderColor: 'rgba(248,81,73,0.3)', background: 'rgba(248,81,73,0.06)' }}>
+          <span style={{ color: 'var(--error)' }}>{syncError}</span>
+        </div>
+      )}
       {data?.syncing && (
         <div className="dashboard-notice" style={{ borderColor: 'rgba(108,142,191,0.3)', background: 'rgba(108,142,191,0.06)' }}>
           <span style={{ color: 'var(--accent-blue)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Initial sync in progress — your data will appear shortly.</span>
@@ -285,7 +301,7 @@ function Dashboard() {
       {!hasAny && (
         <div style={{
           background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
+          border: '1px solid var(--border)',
           borderRadius: '14px',
           padding: '1.5rem',
           marginBottom: '1.5rem',
@@ -304,8 +320,8 @@ function Dashboard() {
               <div key={label} style={{
                 display: 'flex', alignItems: 'center', gap: '0.75rem',
                 padding: '0.6rem 0.85rem',
-                background: done ? 'rgba(16,185,129,0.06)' : 'var(--bg-secondary)',
-                border: `1px solid ${done ? 'rgba(16,185,129,0.2)' : 'var(--border-color)'}`,
+                background: done ? 'rgba(16,185,129,0.06)' : 'var(--bg-surface)',
+                border: `1px solid ${done ? 'rgba(16,185,129,0.2)' : 'var(--border)'}`,
                 borderRadius: '8px',
                 opacity: done ? 0.75 : 1,
               }}>
@@ -519,7 +535,7 @@ function Dashboard() {
         </Link>
 
         <Link to="/practice" className="dashboard-card dashboard-card-link">
-          <h3><FileEdit size={18} style={{ color: 'var(--accent-primary)' }} /> Practice Review</h3>
+          <h3><FileEdit size={18} style={{ color: 'var(--accent)' }} /> Practice Review</h3>
           <p>Review problems you attempted but didn't solve, with editorial links.</p>
           <span className="badge">Review Queue</span>
         </Link>
@@ -634,7 +650,7 @@ function Dashboard() {
         {/* Packages */}
         {(data?.packages?.npm?.length > 0 || data?.packages?.pypi?.length > 0) ? (
           <div className="dashboard-card">
-            <h3><Package size={18} style={{ color: 'var(--accent-primary)' }} /> Open Source Impact</h3>
+            <h3><Package size={18} style={{ color: 'var(--accent)' }} /> Open Source Impact</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.5rem' }}>
               {data.packages.npm?.map(pkg => (
                 <div key={`npm-${pkg.name}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
