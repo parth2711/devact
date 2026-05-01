@@ -7,25 +7,25 @@ const FEATURES = [
     icon: <Github size={20} />,
     color: 'amber',
     title: 'GitHub Tracker',
-    desc: 'Monitor commits, PRs, and contribution streaks across all your repositories in real time.',
+    desc: 'Commits, PRs, issues, and your contribution calendar in one place.',
   },
   {
     icon: <Code2 size={20} />,
     color: 'blue',
     title: 'CP Tracker',
-    desc: 'Track your Codeforces rating, LeetCode progress, and full contest history.',
+    desc: 'Codeforces rating history, LeetCode solve counts, and contest records.',
   },
   {
     icon: <BarChart2 size={20} />,
     color: 'green',
     title: 'Repo Visualizer',
-    desc: 'Visualize language breakdowns, star growth, and repository activity at a glance.',
+    desc: 'Language breakdown, star counts, and activity across your repos.',
   },
   {
     icon: <LayoutDashboard size={20} />,
     color: 'orange',
     title: 'Unified Dashboard',
-    desc: 'All your developer metrics — GitHub, CP ratings, coding time — in one place.',
+    desc: 'GitHub, CP ratings, coding time, and more — unified in one dashboard.',
   },
 ];
 
@@ -51,13 +51,13 @@ function Home() {
         </div>
 
         <h1>
-          Know your progress.<br />
-          <span className="hero-accent">Every single day.</span>
+          One place for all
+          <span className="hero-accent"> your dev stats.</span>
         </h1>
 
         <p>
-          DevAct aggregates your GitHub, competitive programming, and coding time
-          metrics into one clean, honest view of your growth.
+          GitHub, Codeforces, LeetCode, WakaTime — pulled together automatically.
+          No manual updates.
         </p>
 
         <div className="hero-actions">

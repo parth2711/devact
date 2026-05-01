@@ -250,8 +250,7 @@ function Dashboard() {
   const hasTrendData = snapshots.length > 1;
 
   // Time-aware greeting
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  
 
   if (loading) return <div className="page"><p className="loading">Loading dashboard…</p></div>;
 
@@ -260,8 +259,7 @@ function Dashboard() {
       {/* ── Header ── */}
       <header className="dashboard-header">
         <div>
-          <h2>{greeting}, {user?.name?.split(' ')[0]}</h2>
-          <p className="dashboard-subtitle">Your developer activity at a glance</p>
+          <h2>{user?.name?.split(' ')[0]}</h2>
         </div>
         <div className="dashboard-header-actions">
           <div className="sync-time">
@@ -312,10 +310,10 @@ function Dashboard() {
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             {[
-              { icon: '🐙', label: 'GitHub username',    done: !!user?.githubUsername,      desc: 'Commits, repos, stars' },
-              { icon: '💙', label: 'Codeforces handle',  done: !!user?.codeforcesHandle,    desc: 'Rating, contests, submissions' },
-              { icon: '🟡', label: 'LeetCode username',  done: !!user?.leetcodeUsername,    desc: 'Problems solved, ranking' },
-              { icon: '⏱️', label: 'WakaTime API key',   done: !!user?.wakatimeConfiguredAt, desc: 'Coding hours per language' },
+              { icon: null, label: 'GitHub',    done: !!user?.githubUsername,      desc: 'Commits, repos, stars' },
+              { icon: null, label: 'Codeforces',  done: !!user?.codeforcesHandle,    desc: 'Rating, contests, submissions' },
+              { icon: null, label: 'LeetCode',  done: !!user?.leetcodeUsername,    desc: 'Problems solved, ranking' },
+              { icon: null, label: 'WakaTime',   done: !!user?.wakatimeConfiguredAt, desc: 'Coding hours per language' },
             ].map(({ icon, label, done, desc }) => (
               <div key={label} style={{
                 display: 'flex', alignItems: 'center', gap: '0.75rem',
@@ -325,10 +323,9 @@ function Dashboard() {
                 borderRadius: '8px',
                 opacity: done ? 0.75 : 1,
               }}>
-                <span style={{ fontSize: '1rem', flexShrink: 0 }}>{icon}</span>
                 <div style={{ flex: 1 }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 600, color: done ? '#10b981' : 'var(--text-primary)' }}>
-                    {done ? '✓ ' : ''}{label}
+                    {label}{done ? ' ✓' : ''}
                   </span>
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>{desc}</span>
                 </div>

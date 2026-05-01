@@ -80,7 +80,7 @@ export default function PublicProfile() {
 
   if (isPrivate) return (
     <div className="page auth-page" style={{ flexDirection: 'column', gap: '1rem' }}>
-      <h2>🔒 Private Profile</h2>
+      <h2>Private Profile</h2>
       <p style={{ color: 'var(--text-muted)' }}><strong>@{username}</strong> keeps this private.</p>
       <Link to="/" className="btn btn-primary">Go Home</Link>
     </div>
