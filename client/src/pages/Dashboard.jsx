@@ -6,9 +6,6 @@ import { Github, Code2, BarChart2, RefreshCw, TrendingUp, Flame, Plus, Trash2, C
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 
-/* ─────────────────────────────────────────
-   Streak Widget
-───────────────────────────────────────── */
 function StreakWidget() {
   const [streak, setStreak] = useState(null);
   useEffect(() => { API.get('/streak').then(r => setStreak(r.data)).catch(() => {}); }, []);
@@ -45,9 +42,6 @@ function StreakWidget() {
   );
 }
 
-/* ─────────────────────────────────────────
-   Goals Widget
-───────────────────────────────────────── */
 const GOAL_PRESETS = [
   { label: 'Solve 1 LC problem',    type: 'lc_solved',      target: 1 },
   { label: 'Solve 2 LC problems',   type: 'lc_solved',      target: 2 },
@@ -249,8 +243,7 @@ function Dashboard() {
 
   const hasTrendData = snapshots.length > 1;
 
-  // Time-aware greeting
-  
+  // for time aware greeting
 
   if (loading) return <div className="page"><p className="loading">Loading dashboard…</p></div>;
 
