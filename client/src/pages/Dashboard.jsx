@@ -351,7 +351,6 @@ function Dashboard() {
 
       {/* ── Stats Row ── */}
       {data && !data.syncing && (() => {
-        // Compute deltas from snapshots (oldest → newest)
         const oldest = snapshots.length > 1 ? snapshots[0] : null;
         const newest = snapshots.length > 1 ? snapshots[snapshots.length - 1] : null;
         const delta = (newVal, oldVal) => {
