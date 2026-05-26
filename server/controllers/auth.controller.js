@@ -2,7 +2,6 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-// Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || '7d',
@@ -13,58 +12,39 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
     const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    if (userExists) return res.status(400).json({ message: 'User already exists' });
 
     const user = await User.create({ name, email, password });
-
     const token = generateToken(user._id);
     res.cookie('token', token, COOKIE_OPTIONS);
-    res.status(201).json({
-      user: { _id: user._id, name: user.name, email: user.email },
-    });
+    res.status(201).json({ user: { _id: user._id, name: user.name, email: user.email } });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-
     const token = generateToken(user._id);
     res.cookie('token', token, COOKIE_OPTIONS);
-    res.json({
-      user: { _id: user._id, name: user.name, email: user.email },
-    });
+    res.json({ user: { _id: user._id, name: user.name, email: user.email } });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Get current user profile
-// @route   GET /api/auth/me
-// @access  Private
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -74,49 +54,48 @@ const getMe = async (req, res) => {
   }
 };
 
-// @desc    Update user profile
-// @route   PATCH /api/auth/profile
-// @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { 
-      name, githubUsername, codeforcesHandle, leetcodeUsername, username, isPublicProfile,
-      wakatimeApiKey, stackoverflowId, npmPackages, pypiPackages
+    const {
+      name, githubUsername, codeforcesHandle, leetcodeUsername,
+      username, isPublicProfile, wakatimeApiKey,
+      stackoverflowId, npmPackages, pypiPackages
     } = req.body;
 
-    // Guard: can't enable public profile without a username
     if (isPublicProfile === true) {
       const currentUser = await User.findById(req.user._id);
-      const effectiveUsername = username || currentUser.username;
+      const effectiveUsername = (username && username.trim()) || currentUser.username;
       if (!effectiveUsername) {
-        return res.status(400).json({ message: 'Please set a username before enabling your public profile.' });
+        return res.status(400).json({ message: 'Set a username before enabling your public profile.' });
       }
     }
 
-    const updateQuery = { $set: {}, $unset: {} };
+    const setFields = {};
+    const unsetFields = {};
 
-    if (name) updateQuery.$set.name = name;
-    if (githubUsername !== undefined) updateQuery.$set.githubUsername = githubUsername;
-    if (codeforcesHandle !== undefined) updateQuery.$set.codeforcesHandle = codeforcesHandle;
-    if (leetcodeUsername !== undefined) updateQuery.$set.leetcodeUsername = leetcodeUsername;
-    
-    // Explicitly handle empty string to avoid regex validation errors for sparse index
-    if (username) {
-      updateQuery.$set.username = username;
+    if (name)                          setFields.name              = name;
+    if (githubUsername   !== undefined) setFields.githubUsername    = githubUsername;
+    if (codeforcesHandle !== undefined) setFields.codeforcesHandle  = codeforcesHandle;
+    if (leetcodeUsername !== undefined) setFields.leetcodeUsername  = leetcodeUsername;
+    if (stackoverflowId  !== undefined) setFields.stackoverflowId   = stackoverflowId;
+    if (npmPackages      !== undefined) setFields.npmPackages       = npmPackages;
+    if (pypiPackages     !== undefined) setFields.pypiPackages      = pypiPackages;
+
+    if (username && username.trim()) {
+      setFields.username = username.trim();
     } else if (username === '') {
-      updateQuery.$unset.username = 1;
-      updateQuery.$set.isPublicProfile = false; // Turn off public if username is cleared
+      unsetFields.username    = 1;
+      setFields.isPublicProfile = false;
     }
 
-    if (stackoverflowId !== undefined) updateQuery.$set.stackoverflowId = stackoverflowId;
-    if (npmPackages !== undefined) updateQuery.$set.npmPackages = npmPackages;
-    if (pypiPackages !== undefined) updateQuery.$set.pypiPackages = pypiPackages;
+    if (isPublicProfile !== undefined && username !== '') {
+      setFields.isPublicProfile = isPublicProfile;
+    }
 
-    // Handle WakaTime Key explicitly to trigger Document pre('save') encryption middleware
     if (wakatimeApiKey !== undefined) {
-      const doc = await User.findById(req.user._id);
+      const doc = await User.findById(req.user._id).select('+wakatimeApiKey');
       if (wakatimeApiKey === '') {
-        doc.wakatimeApiKey = undefined;
+        doc.wakatimeApiKey       = undefined;
         doc.wakatimeConfiguredAt = null;
       } else {
         doc.wakatimeApiKey = wakatimeApiKey;
@@ -124,13 +103,14 @@ const updateProfile = async (req, res) => {
       await doc.save();
     }
 
-    if (isPublicProfile !== undefined && username !== '') {
-      updateQuery.$set.isPublicProfile = isPublicProfile;
-    }
+    const updateQuery = {};
+    if (Object.keys(setFields).length   > 0) updateQuery.$set   = setFields;
+    if (Object.keys(unsetFields).length > 0) updateQuery.$unset = unsetFields;
 
-    // Clean up empty $set or $unset to avoid Mongo errors
-    if (Object.keys(updateQuery.$set).length === 0) delete updateQuery.$set;
-    if (Object.keys(updateQuery.$unset).length === 0) delete updateQuery.$unset;
+    if (Object.keys(updateQuery).length === 0) {
+      const user = await User.findById(req.user._id);
+      return res.json(user);
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -140,23 +120,17 @@ const updateProfile = async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    // Handle duplicate username error
     if (error.code === 11000 && error.keyPattern?.username) {
-      return res.status(400).json({ message: 'This username is already taken.' });
+      return res.status(400).json({ message: 'That username is already taken.' });
     }
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Forgot password
-// @route   POST /api/auth/forgotpassword
-// @access  Public
 const forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return res.status(404).json({ message: 'There is no user with that email' });
-    }
+    if (!user) return res.status(404).json({ message: 'No account with that email' });
 
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
@@ -164,40 +138,31 @@ const forgotPassword = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const frontendResetUrl = `${frontendUrl}/resetpassword/${resetToken}`;
 
-    console.log(`\n=================================\nPASSWORD RESET LINK:\n${frontendResetUrl}\n=================================\n`);
-
+    console.log(`PASSWORD RESET LINK: ${frontendResetUrl}`);
     res.status(200).json({ message: 'Email sent' });
   } catch (error) {
     const user = await User.findOne({ email: req.body.email });
     if (user) {
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
+      user.resetPasswordToken   = undefined;
+      user.resetPasswordExpire  = undefined;
       await user.save({ validateBeforeSave: false });
     }
     res.status(500).json({ message: 'Email could not be sent' });
   }
 };
 
-// @desc    Reset password
-// @route   PUT /api/auth/resetpassword/:resettoken
-// @access  Public
 const resetPassword = async (req, res) => {
   try {
-    // Get hashed token
     const resetPasswordToken = crypto.createHash('sha256').update(req.params.resettoken).digest('hex');
-
     const user = await User.findOne({
       resetPasswordToken,
       resetPasswordExpire: { $gt: Date.now() },
     });
 
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid or expired token' });
-    }
+    if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
 
-    // Set new password
-    user.password = req.body.password;
-    user.resetPasswordToken = undefined;
+    user.password            = req.body.password;
+    user.resetPasswordToken  = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
 
@@ -212,9 +177,6 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// @desc    Logout user (clear cookie)
-// @route   POST /api/auth/logout
-// @access  Private
 const logoutUser = (req, res) => {
   res.clearCookie('token', COOKIE_OPTIONS).json({ message: 'Logged out' });
 };
