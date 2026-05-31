@@ -62,9 +62,10 @@ app.use(cookieParser());
 connectDB();
 
 app.use(session({
-  secret: process.env.JWT_SECRET,
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: false,
+  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, sameSite: 'lax' },
 }));
 app.use(passport.initialize());
 app.use(passport.session());
