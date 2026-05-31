@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Check } from 'lucide-react';
 
@@ -8,8 +8,10 @@ function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
-  const { login }               = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const navigate                = useNavigate();
+
+  if (!authLoading && user) return <Navigate to="/dashboard" replace />;
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 

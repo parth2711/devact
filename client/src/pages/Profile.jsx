@@ -215,9 +215,12 @@ function Profile() {
                 {user?.isGithubVerified ? (
                   <span style={{ color: '#10b981', fontSize: '0.875rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}><Check size={14} /> Verified via OAuth</span>
                 ) : (
-                  <a href={import.meta.env.DEV ? `http://localhost:5000/api/auth/github/connect?token=${token}` : `/api/auth/github/connect?token=${token}`} style={{ color: '#3b82f6', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>
+                  <button type="button" onClick={async () => {
+                    await API.post('/auth/github/connect/init');
+                    window.location.href = import.meta.env.DEV ? 'http://localhost:5000/api/auth/github/connect' : '/api/auth/github/connect';
+                  }} style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}>
                     Connect Account
-                  </a>
+                  </button>
                 )}
               </label>
               <input

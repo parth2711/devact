@@ -18,8 +18,15 @@ router.put('/resetpassword/:resettoken', resetPassword);
 // GitHub OAuth routes
 router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
 
-router.get('/github/connect', protect, (req, res, next) => {
-  req.session.connectUserId = req.user._id;
+router.post('/github/connect/init', protect, (req, res) => {
+  req.session.connectUserId = req.user._id.toString();
+  res.json({ ok: true });
+});
+
+router.get('/github/connect', (req, res, next) => {
+  if (!req.session.connectUserId) {
+    return res.redirect((process.env.FRONTEND_URL || 'http://localhost:5173') + '/profile?error=session_missing');
+  }
   passport.authenticate('github', { scope: ['user:email'] })(req, res, next);
 });
 
@@ -39,4 +46,3 @@ router.get(
 );
 
 module.exports = router;
-
