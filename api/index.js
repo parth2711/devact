@@ -1,7 +1,5 @@
-const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const { generalLimiter } = require('../server/middleware/rateLimiter');
@@ -59,9 +57,10 @@ app.use(async (req, res, next) => {
 // Initialize Session and Passport
 app.use(
   session({
-    secret: process.env.JWT_SECRET || 'devact_session_secret',
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'devact_session_secret',
     resave: false,
     saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, sameSite: 'lax' },
   })
 );
 app.use(passport.initialize());

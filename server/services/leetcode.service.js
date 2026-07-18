@@ -122,8 +122,6 @@ async function getRecentFailedSubmissions(username) {
   return Array.from(seen.values());
 }
 
-module.exports = { getLeetCodeStats, getRecentFailedSubmissions };
-
 /**
  * Fetch all recent LeetCode submissions (accepted + failed), limit 20.
  */
