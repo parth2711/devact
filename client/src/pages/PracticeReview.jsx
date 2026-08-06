@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { ExternalLink, AlertTriangle, BookOpen, Trophy } from 'lucide-react';
+import { PracticeReviewSkeleton } from '../components/SkeletonLoaders';
 
 function PracticeReview() {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ function PracticeReview() {
     }
   };
 
-  if (loading) return <div className="page"><p className="loading">Loading practice review...</p></div>;
+  if (loading) return <PracticeReviewSkeleton />;
 
   // Empty state: no handles configured
   if (!hasCF && !hasLC) {

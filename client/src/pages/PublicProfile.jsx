@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Flame, Copy, Check, Github, ExternalLink } from 'lucide-react';
+import { PublicProfileSkeleton } from '../components/SkeletonLoaders';
 
 const CF_RANK_COLORS = {
   legendary: '#ff0000', grandmaster: '#ff3333', master: '#ff8c00',
@@ -68,7 +69,7 @@ export default function PublicProfile() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (loading) return <div className="page auth-page"><p style={{ color: 'var(--text-muted)' }}>Loading…</p></div>;
+  if (loading) return <PublicProfileSkeleton />;
 
   if (notFound) return (
     <div className="page auth-page" style={{ flexDirection: 'column', gap: '1rem' }}>

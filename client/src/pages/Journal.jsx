@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { BookOpen, Save, Trash2, Tag, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { JournalEntrySkeleton } from '../components/SkeletonLoaders';
 
 const MOODS = [
   { value: 'great', label: 'Great' },
@@ -229,7 +230,7 @@ function Journal() {
       {/* Recent entries */}
       <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '1rem' }}>Recent Entries</h3>
 
-      {histLoading && <p className="loading" style={{ padding: '2rem 0' }}>Loading entries...</p>}
+      {histLoading && <JournalEntrySkeleton />}
 
       {!histLoading && history.length === 0 && (
         <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', textAlign: 'center', padding: '2rem 0' }}>

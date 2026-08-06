@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { Star, Activity } from 'lucide-react';
+import { CPSkeleton } from '../components/SkeletonLoaders';
 
 function SkillDecayWidget({ items }) {
   if (!items || items.length === 0) return null;
@@ -125,7 +126,7 @@ function CPTracker() {
   };
 
   if (loading) {
-    return <div className="page"><p className="loading">Loading CP data...</p></div>;
+    return <CPSkeleton />;
   }
 
   if (!hasCF && !hasLC) {
