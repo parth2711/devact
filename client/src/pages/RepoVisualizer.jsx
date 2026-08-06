@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import ReactMarkdown from 'react-markdown';
 import { Globe, Lock, FileText, Folder, Star, GitFork, Users, CircleAlert, Sparkles, XCircle } from 'lucide-react';
+import { RepoVisualizerSkeleton, RepoDetailSkeleton } from '../components/SkeletonLoaders';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell
@@ -145,7 +146,7 @@ function RepoVisualizer() {
     }
   };
 
-  if (loading) return <div className="page"><p className="loading">loading repos...</p></div>;
+  if (loading) return <RepoVisualizerSkeleton />;
 
   if (!user?.githubUsername) {
     return (
@@ -200,7 +201,7 @@ function RepoVisualizer() {
       </div>
 
       {detailsLoading ? (
-        <p className="loading">crunching data...</p>
+        <RepoDetailSkeleton />
       ) : repoDetails ? (
         <div className="bento-grid">
           {/* stats */}

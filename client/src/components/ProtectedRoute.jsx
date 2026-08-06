@@ -1,11 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { GenericPageSkeleton } from './SkeletonLoaders';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="page"><p className="loading">Loading...</p></div>;
+    return <GenericPageSkeleton />;
   }
 
   if (!user) {

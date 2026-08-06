@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { Link as LinkIcon, AlertTriangle, Folder, Star, GitFork, BarChart2, Upload, GitPullRequest, Bug, PlusCircle, Trash2, MessageSquare, Bookmark } from 'lucide-react';
+import { GitHubSkeleton } from '../components/SkeletonLoaders';
 
 function GitHubTracker() {
   const { user } = useAuth();
@@ -41,7 +42,7 @@ function GitHubTracker() {
   };
 
   if (loading) {
-    return <div className="page"><p className="loading">Loading GitHub data...</p></div>;
+    return <GitHubSkeleton />;
   }
 
   if (!user?.githubUsername) {

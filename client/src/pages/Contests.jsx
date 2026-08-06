@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import API from '../api/axios';
+import { ContestsSkeleton } from '../components/SkeletonLoaders';
 import { Calendar, ExternalLink, Clock, Trophy } from 'lucide-react';
 
 const PLATFORM_COLORS = {
@@ -155,7 +156,7 @@ function Contests() {
         </div>
       </div>
 
-      {loading && <p className="loading">Fetching contests...</p>}
+      {loading && <ContestsSkeleton />}
 
       {!loading && filtered.length === 0 && (
         <div className="empty-state">

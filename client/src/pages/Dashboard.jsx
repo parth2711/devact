@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { Github, Code2, BarChart2, RefreshCw, TrendingUp, Flame, Plus, Trash2, Check, Trophy, Clock, FileEdit, BookOpen, Package, Loader, Ghost } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { DashboardSkeleton } from '../components/SkeletonLoaders';
 
 
 function StreakWidget() {
@@ -245,7 +246,7 @@ function Dashboard() {
 
   // for time aware greeting
 
-  if (loading) return <div className="page"><p className="loading">Loading dashboard…</p></div>;
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className={`page dashboard-page ${shadowMode ? 'shadow-mode' : ''}`}>
