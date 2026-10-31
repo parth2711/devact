@@ -1,5 +1,5 @@
 const connectDB = require('../../server/config/db');
-const { syncAllUsers } = require('../../server/services/sync.service');
+const syncService = require('../../server/services/sync.service');
 
 /**
  * Vercel Serverless Function / HTTP endpoint for scheduled background sync.
@@ -28,7 +28,7 @@ async function cronSyncHandler(req, res) {
     const limit = parseInt(req.query?.limit, 10) || 10;
     const skipSyncedWithin = parseInt(req.query?.skipSyncedWithin, 10) || 120;
 
-    const result = await syncAllUsers({
+    const result = await syncService.syncAllUsers({
       limit,
       skipSyncedWithinMinutes: skipSyncedWithin,
     });

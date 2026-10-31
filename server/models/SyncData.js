@@ -119,4 +119,4 @@ const syncDataSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('SyncData', syncDataSchema);
+module.exports = mongoose.models.SyncData || mongoose.model('SyncData', syncDataSchema);
