@@ -1,0 +1,39 @@
+name: Scheduled Background Sync
+
+on:
+  schedule:
+    # Runs every 3 hours (00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC)
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: sync-cron
+  cancel-in-progress: false
+
+jobs:
+  trigger-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger DevAct Sync Endpoint
+        run: |
+          if [ -z "${{ secrets.CRON_SYNC_URL }}" ] || [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Error: CRON_SYNC_URL and CRON_SECRET must be configured in repository secrets."
+            exit 1
+          fi
+
+          echo "Triggering DevAct sync at ${{ secrets.CRON_SYNC_URL }}..."
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" -X POST "${{ secrets.CRON_SYNC_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 60)
+
+          echo "Response HTTP Status: $HTTP_STATUS"
+          echo "Response Body:"
+          cat response.json
+          echo ""
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Cron sync failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
+          echo "Cron sync completed successfully."
