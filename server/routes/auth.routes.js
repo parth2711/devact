@@ -37,6 +37,7 @@ router.get(
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     // Generate JWT and set as httpOnly cookie
     const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
+      algorithm: 'HS256',
       expiresIn: process.env.JWT_EXPIRE || '7d',
     });
     res.cookie('token', token, COOKIE_OPTIONS);
