@@ -108,12 +108,12 @@ function Navbar() {
             </div>
             <button onClick={handleLogout} className="nav-logout-btn">
               <LogOut size={14} />
-              Logout
+              Sign out
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className={isActive('/login')} onClick={closeMenu}>Login</Link>
+            <Link to="/login" className={isActive('/login')} onClick={closeMenu}>Sign in</Link>
             <Link to="/register" className="btn btn-primary btn-sm" onClick={closeMenu}>Get Started</Link>
           </>
         )}

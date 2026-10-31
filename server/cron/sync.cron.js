@@ -1,18 +1,10 @@
 const cron = require('node-cron');
-const User = require('../models/User');
-const { syncUserData } = require('../services/sync.service');
-
-const BATCH_SIZE = 5;
-const BATCH_DELAY_MS = 2000;
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const { syncAllUsers } = require('../services/sync.service');
 
 /**
  * Start the background sync cron job.
- * Runs every 3 hours. Processes users in batches of 5 with a 2-second delay
- * between batches to avoid external API rate limit spikes.
+ * Runs every 3 hours for local development environments.
+ * Uses bounded sync with rate limiting and deduplication.
  */
 function startSyncCron() {
   // Every 3 hours: '0 */3 * * *'
@@ -20,32 +12,16 @@ function startSyncCron() {
     console.log('[Cron] Starting background sync...');
 
     try {
-      // Find all users who have at least one connected account
-      const users = await User.find({
-        $or: [
-          { githubUsername: { $ne: '' } },
-          { codeforcesHandle: { $ne: '' } },
-          { leetcodeUsername: { $ne: '' } },
-        ],
-      }).select('_id');
+      const summary = await syncAllUsers({
+        limit: 50,
+        skipSyncedWithinMinutes: 150,
+        batchSize: 5,
+        batchDelayMs: 2000,
+      });
 
-      console.log(`[Cron] Found ${users.length} users to sync`);
-
-      // Process in batches
-      for (let i = 0; i < users.length; i += BATCH_SIZE) {
-        const batch = users.slice(i, i + BATCH_SIZE);
-        
-        await Promise.allSettled(
-          batch.map((user) => syncUserData(user._id))
-        );
-
-        // Delay between batches (unless it's the last batch)
-        if (i + BATCH_SIZE < users.length) {
-          await sleep(BATCH_DELAY_MS);
-        }
-      }
-
-      console.log('[Cron] Background sync complete');
+      console.log(
+        `[Cron] Background sync complete. Processed: ${summary.processed}, Successful: ${summary.successful}, Failed: ${summary.failed}, Skipped recent: ${summary.skippedRecent}`
+      );
     } catch (error) {
       console.error('[Cron] Sync error:', error.message);
     }
@@ -55,3 +31,4 @@ function startSyncCron() {
 }
 
 module.exports = { startSyncCron };
+

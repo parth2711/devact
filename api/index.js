@@ -1,99 +1,17 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
-const { generalLimiter } = require('../server/middleware/rateLimiter');
-
-// Startup Config Check for WakaTime encryption
-if (!process.env.ENCRYPTION_KEY || Buffer.from(process.env.ENCRYPTION_KEY).length !== 32) {
-  console.error('[Config] ENCRYPTION_KEY must be exactly 32 bytes for AES-256-CBC');
-}
-
 const connectDB = require('../server/config/db');
+const { createApp } = require('../server/app');
 
-// ── Import route handlers ──
-const authRoutes = require('../server/routes/auth.routes');
-const githubRoutes = require('../server/routes/github.routes');
-const cpRoutes = require('../server/routes/cp.routes');
-const dashboardRoutes = require('../server/routes/dashboard.routes');
-const repoRoutes = require('../server/routes/repo.routes');
-const syncRoutes = require('../server/routes/sync.routes');
-const snapshotRoutes = require('../server/routes/snapshot.routes');
-const publicRoutes = require('../server/routes/public.routes');
-const accountRoutes = require('../server/routes/account.routes');
-const contestsRoutes = require('../server/routes/contests.routes');
-const streakRoutes = require('../server/routes/streak.routes');
-const goalsRoutes = require('../server/routes/goals.routes');
-const journalRoutes = require('../server/routes/journal.routes');
-
-const session = require('express-session');
-const passport = require('../server/config/passport');
-
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-
-// ── Express App ──
-const app = express();
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
-app.use(cors({
-  origin: FRONTEND_URL,
-  credentials: true,
-}));
-app.use(express.json());
-app.use(cookieParser());
-
-// Apply general rate limiter to all API routes
-app.use('/api', generalLimiter);
-app.use(async (req, res, next) => {
+// ── Per-request DB connection (serverless-safe) ──
+const dbMiddleware = async (req, res, next) => {
   try {
     await connectDB();
     next();
   } catch (err) {
-    res.status(500).json({ message: `Database connection failed: ${err.message}` });
+    res.status(503).json({ message: 'Database connection failed' });
   }
-});
+};
 
-// Initialize Session and Passport
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'devact_session_secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, sameSite: 'lax' },
-  })
-);
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Mount routes
-app.use('/api/auth', authRoutes);
-app.use('/api/github', githubRoutes);
-app.use('/api/cp', cpRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/repos', repoRoutes);
-app.use('/api/sync', syncRoutes);
-app.use('/api/snapshots', snapshotRoutes);
-app.use('/api/u', publicRoutes);
-app.use('/api/account', accountRoutes);
-app.use('/api/contests', contestsRoutes);
-app.use('/api/streak', streakRoutes);
-app.use('/api/goals', goalsRoutes);
-app.use('/api/journal', journalRoutes);
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.message);
-  res.status(err.status || 500).json({
-    message: process.env.NODE_ENV === 'production'
-      ? 'Something went wrong'
-      : err.message,
-  });
-});
+// ── Express App (shared configuration) ──
+const app = createApp({ dbMiddleware });
 
 module.exports = app;

@@ -8,6 +8,20 @@ const { getWakatimeStats } = require('./wakatime.service');
 const { getStackOverflowStats } = require('./stackoverflow.service');
 const { getPackageStats } = require('./packages.service');
 
+const API_TIMEOUT_MS = 12000;
+
+function withTimeout(promise, ms = API_TIMEOUT_MS, label = 'API call') {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`${label} timed out after ${ms}ms`));
+      }, ms);
+      if (timer.unref) timer.unref();
+    }),
+  ]);
+}
+
 async function syncUserData(userId) {
   const user = await User.findById(userId).select('+wakatimeApiKey');
   if (!user) throw new Error('User not found');
@@ -23,9 +37,9 @@ async function syncUserData(userId) {
     try {
       const token = process.env.GITHUB_TOKEN;
       const [stats, repos, activity] = await Promise.all([
-        getUserStats(user.githubUsername, token),
-        getUserRepos(user.githubUsername, token),
-        getUserActivity(user.githubUsername, token),
+        withTimeout(getUserStats(user.githubUsername, token), API_TIMEOUT_MS, 'GitHub stats'),
+        withTimeout(getUserRepos(user.githubUsername, token), API_TIMEOUT_MS, 'GitHub repos'),
+        withTimeout(getUserActivity(user.githubUsername, token), API_TIMEOUT_MS, 'GitHub activity'),
       ]);
       syncData.github = { stats, repos, activity, lastSyncedAt: now };
     } catch (err) {
@@ -36,9 +50,9 @@ async function syncUserData(userId) {
   if (user.codeforcesHandle) {
     try {
       const [userInfo, submissions, ratingHistory] = await Promise.all([
-        getUserInfo(user.codeforcesHandle),
-        getSubmissions(user.codeforcesHandle, 20),
-        getRatingHistory(user.codeforcesHandle),
+        withTimeout(getUserInfo(user.codeforcesHandle), API_TIMEOUT_MS, 'Codeforces userInfo'),
+        withTimeout(getSubmissions(user.codeforcesHandle, 20), API_TIMEOUT_MS, 'Codeforces submissions'),
+        withTimeout(getRatingHistory(user.codeforcesHandle), API_TIMEOUT_MS, 'Codeforces ratingHistory'),
       ]);
       syncData.codeforces = { userInfo, submissions, ratingHistory, lastSyncedAt: now };
     } catch (err) {
@@ -49,8 +63,8 @@ async function syncUserData(userId) {
   if (user.leetcodeUsername) {
     try {
       const [stats, recentSubs] = await Promise.all([
-        getLeetCodeStats(user.leetcodeUsername),
-        getRecentSubmissions(user.leetcodeUsername).catch(() => [])
+        withTimeout(getLeetCodeStats(user.leetcodeUsername), API_TIMEOUT_MS, 'LeetCode stats'),
+        withTimeout(getRecentSubmissions(user.leetcodeUsername).catch(() => []), API_TIMEOUT_MS, 'LeetCode recent submissions'),
       ]);
       syncData.leetcode = { stats, recentSubmissions: recentSubs, lastSyncedAt: now };
     } catch (err) {
@@ -63,10 +77,14 @@ async function syncUserData(userId) {
   const npmList = user.npmPackages || [];
   const pypiList = user.pypiPackages || [];
 
-  const wakatimePromise = wakatimeKey ? getWakatimeStats(wakatimeKey) : Promise.resolve(undefined);
-  const soPromise = soId ? getStackOverflowStats(soId) : Promise.resolve(undefined);
+  const wakatimePromise = wakatimeKey
+    ? withTimeout(getWakatimeStats(wakatimeKey), API_TIMEOUT_MS, 'WakaTime stats')
+    : Promise.resolve(undefined);
+  const soPromise = soId
+    ? withTimeout(getStackOverflowStats(soId), API_TIMEOUT_MS, 'StackOverflow stats')
+    : Promise.resolve(undefined);
   const packagesPromise = (npmList.length > 0 || pypiList.length > 0) 
-    ? getPackageStats(npmList, pypiList) 
+    ? withTimeout(getPackageStats(npmList, pypiList), API_TIMEOUT_MS, 'Package stats')
     : Promise.resolve(undefined);
 
   const newPlatforms = await Promise.allSettled([wakatimePromise, soPromise, packagesPromise]);
@@ -98,11 +116,11 @@ async function syncUserData(userId) {
   const practiceReviewLabels = [];
 
   if (user.codeforcesHandle) {
-    practiceReviewPromises.push(getFailedProblems(user.codeforcesHandle));
+    practiceReviewPromises.push(withTimeout(getFailedProblems(user.codeforcesHandle), API_TIMEOUT_MS, 'Codeforces failed problems'));
     practiceReviewLabels.push('codeforces');
   }
   if (user.leetcodeUsername) {
-    practiceReviewPromises.push(getRecentFailedSubmissions(user.leetcodeUsername));
+    practiceReviewPromises.push(withTimeout(getRecentFailedSubmissions(user.leetcodeUsername), API_TIMEOUT_MS, 'LeetCode failed submissions'));
     practiceReviewLabels.push('leetcode');
   }
 
@@ -246,4 +264,75 @@ async function saveDailySnapshot(userId, syncData) {
   }
 }
 
-module.exports = { syncUserData };
+/**
+ * Run a bounded background sync across eligible users.
+ * Supports skipping recently-synced users, limiting batch sizes,
+ * and rate-limit throttling to prevent serverless execution timeouts.
+ */
+async function syncAllUsers({
+  limit = 10,
+  skipSyncedWithinMinutes = 120,
+  batchSize = 3,
+  batchDelayMs = 1000,
+} = {}) {
+  const users = await User.find({
+    $or: [
+      { githubUsername: { $exists: true, $ne: '' } },
+      { codeforcesHandle: { $exists: true, $ne: '' } },
+      { leetcodeUsername: { $exists: true, $ne: '' } },
+      { stackoverflowId: { $exists: true, $ne: '' } },
+      { wakatimeApiKey: { $exists: true, $ne: null } },
+    ],
+  }).select('_id name');
+
+  let usersToSync = users;
+
+  if (skipSyncedWithinMinutes > 0) {
+    const cutoff = new Date(Date.now() - skipSyncedWithinMinutes * 60 * 1000);
+    const recentSyncs = await SyncData.find({
+      lastFullSync: { $gte: cutoff },
+    }).select('userId');
+    const recentSet = new Set(recentSyncs.map((s) => s.userId.toString()));
+    usersToSync = users.filter((u) => !recentSet.has(u._id.toString()));
+  }
+
+  const selectedUsers = usersToSync.slice(0, limit);
+  let successCount = 0;
+  let failureCount = 0;
+  const errors = [];
+
+  for (let i = 0; i < selectedUsers.length; i += batchSize) {
+    const batch = selectedUsers.slice(i, i + batchSize);
+    const results = await Promise.allSettled(
+      batch.map((user) => syncUserData(user._id))
+    );
+
+    results.forEach((res, idx) => {
+      if (res.status === 'fulfilled') {
+        successCount++;
+      } else {
+        failureCount++;
+        errors.push({
+          userId: batch[idx]._id,
+          name: batch[idx].name,
+          error: res.reason?.message || 'Unknown sync error',
+        });
+      }
+    });
+
+    if (i + batchSize < selectedUsers.length && batchDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, batchDelayMs));
+    }
+  }
+
+  return {
+    totalEligible: users.length,
+    skippedRecent: users.length - usersToSync.length,
+    processed: selectedUsers.length,
+    successful: successCount,
+    failed: failureCount,
+    errors,
+  };
+}
+
+module.exports = { syncUserData, syncAllUsers, withTimeout };

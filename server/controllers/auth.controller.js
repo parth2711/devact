@@ -4,6 +4,7 @@ const crypto = require('crypto');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
+    algorithm: 'HS256',
     expiresIn: process.env.JWT_EXPIRE || '7d',
   });
 };
@@ -138,7 +139,7 @@ const forgotPassword = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const frontendResetUrl = `${frontendUrl}/resetpassword/${resetToken}`;
 
-    console.log(`PASSWORD RESET LINK: ${frontendResetUrl}`);
+    // Note: Email service pending integration; token is not logged to prevent credential leak
     res.status(200).json({ message: 'Email sent' });
   } catch (error) {
     const user = await User.findOne({ email: req.body.email });

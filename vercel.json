@@ -4,11 +4,15 @@
   "installCommand": "npm install",
   "outputDirectory": "client/dist",
   "rewrites": [
+    { "source": "/api/cron/sync", "destination": "/api/cron/sync.js" },
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "functions": {
     "api/index.js": {
+      "includeFiles": "server/**"
+    },
+    "api/cron/sync.js": {
       "includeFiles": "server/**"
     }
   }

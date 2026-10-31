@@ -85,7 +85,7 @@ function PracticeReview() {
       {hasNoFailures && (
         <div className="empty-state" style={{ paddingTop: '3rem' }}>
           <Trophy size={48} style={{ color: '#10b981', marginBottom: '1rem' }} />
-          <h3 style={{ color: 'var(--text-primary)' }}>No failed problems found — great work!</h3>
+          <h3 style={{ color: 'var(--text-primary)' }}>No failed problems found. Great work!</h3>
           <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
             Keep solving and your latest attempts will appear here after sync.
           </p>
@@ -96,7 +96,7 @@ function PracticeReview() {
       {cfProblems.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
           <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            Codeforces — Failed Problems
+            Codeforces: Failed Problems
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {cfProblems.map((p, i) => (
@@ -145,7 +145,7 @@ function PracticeReview() {
       {lcProblems.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
           <h3 className="section-title lc-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            LeetCode — Failed Problems
+            LeetCode: Failed Problems
           </h3>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem', opacity: 0.7 }}>
             Shows failed problems from your last 20 LeetCode submissions.

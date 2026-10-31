@@ -160,7 +160,7 @@ function CPTracker() {
       {/* Codeforces Section */}
       {hasCF && cfStats && (
         <>
-          <h3 className="section-title">Codeforces — {cfStats.userInfo.handle}</h3>
+          <h3 className="section-title">Codeforces: {cfStats.userInfo.handle}</h3>
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-value">{cfStats.userInfo.rating}</span>
@@ -235,7 +235,7 @@ function CPTracker() {
       {/* LeetCode Section */}
       {hasLC && lcStats && (
         <>
-          <h3 className="section-title lc-title">LeetCode — {lcStats.username}</h3>
+          <h3 className="section-title lc-title">LeetCode: {lcStats.username}</h3>
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-value">{lcStats.solved.all}</span>
