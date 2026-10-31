@@ -64,7 +64,7 @@ function Journal() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      setSaveError(err.response?.data?.message || 'Failed to save — try again.');
+      setSaveError(err.response?.data?.message || 'Failed to save. Try again.');
     } finally {
       setSaving(false);
     }
@@ -194,7 +194,7 @@ function Journal() {
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={addTag}
-            placeholder="tag it — press Enter to add (e.g. graphs, contest, debug)"
+            placeholder="tag it, press Enter to add (e.g. graphs, contest, debug)"
             style={{
               width: '100%',
               background: 'var(--bg-surface)',

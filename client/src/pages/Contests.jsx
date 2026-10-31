@@ -162,7 +162,7 @@ function Contests() {
         <div className="empty-state">
           <Trophy size={40} style={{ color: 'var(--accent-primary)', marginBottom: '1rem' }} />
           <h3>No upcoming contests found</h3>
-          <p style={{ color: 'var(--text-muted)' }}>Check back soon — contests are usually announced a few days in advance.</p>
+          <p style={{ color: 'var(--text-muted)' }}>Check back soon. Contests are usually announced a few days in advance.</p>
         </div>
       )}
 

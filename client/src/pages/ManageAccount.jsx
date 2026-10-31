@@ -109,7 +109,7 @@ function ManageAccount() {
               style={{ opacity: 0.5, cursor: 'not-allowed' }}
             />
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
-              Email change coming soon — requires email verification.
+              Email change coming soon. Requires email verification.
             </p>
           </div>
           {nameMsg && <p style={{ color: nameMsg.includes('success') ? '#10b981' : '#ef4444', fontSize: '0.875rem', marginBottom: '0.75rem' }}>{nameMsg}</p>}

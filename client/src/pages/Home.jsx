@@ -25,7 +25,7 @@ const FEATURES = [
     icon: <LayoutDashboard size={20} />,
     color: 'orange',
     title: 'Unified Dashboard',
-    desc: 'GitHub, CP ratings, coding time, and more — unified in one dashboard.',
+    desc: 'GitHub, CP ratings, coding time, and more, unified in one dashboard.',
   },
 ];
 
@@ -56,7 +56,7 @@ function Home() {
         </h1>
 
         <p>
-          GitHub, Codeforces, LeetCode, WakaTime — pulled together automatically.
+          GitHub, Codeforces, LeetCode, WakaTime, pulled together automatically.
           No manual updates.
         </p>
 

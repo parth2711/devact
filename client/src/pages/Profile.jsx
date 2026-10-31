@@ -176,7 +176,7 @@ function Profile() {
                 id="username"
                 type="text"
                 name="username"
-                placeholder="pick a handle — lowercase, no spaces"
+                placeholder="pick a handle, lowercase, no spaces"
                 value={formData.username}
                 onChange={handleChange}
                 pattern="[a-z0-9_]{3,20}"
@@ -283,7 +283,7 @@ function Profile() {
                 id="wakatimeApiKey"
                 type="password"
                 name="wakatimeApiKey"
-                placeholder={user?.wakatimeConfiguredAt ? 'Key saved — type to replace' : 'Paste your secret API key here'}
+                placeholder={user?.wakatimeConfiguredAt ? 'Key saved. Type to replace.' : 'Paste your secret API key here'}
                 autoComplete="new-password"
                 value={formData.wakatimeApiKey === undefined ? '' : formData.wakatimeApiKey}
                 onChange={handleChange}
@@ -301,7 +301,7 @@ function Profile() {
                 onChange={handleChange}
               />
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                Open your SO profile — the number in the URL is your ID: stackoverflow.com/users/<strong>12345678</strong>/your-name
+                Open your SO profile. The number in the URL is your ID: stackoverflow.com/users/<strong>12345678</strong>/your-name
               </p>
             </div>
 

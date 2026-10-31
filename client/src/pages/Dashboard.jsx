@@ -36,7 +36,7 @@ function StreakWidget() {
       </div>
       {!streak.activeToday && (
         <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.75rem', textAlign: 'center' }}>
-          No activity yet today — commit, submit, or code to keep your streak alive.
+          No activity today. Commit, submit, or code to keep your streak alive.
         </p>
       )}
     </div>
@@ -117,7 +117,7 @@ function GoalsWidget() {
       </div>
 
       {goals.length === 0 && !adding && (
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>No goals yet — add one to track your daily targets.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', padding: '1rem 0' }}>No goals yet. Add one to track your daily targets.</p>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: adding ? '1rem' : 0 }}>
@@ -230,7 +230,7 @@ function Dashboard() {
       }, 3000);
       setTimeout(() => { clearInterval(poll); setSyncing(false); }, 30000);
     } catch (err) {
-      setSyncError(err.response?.data?.message || 'Sync failed — try again.');
+      setSyncError(err.response?.data?.message || 'Sync failed. Try again.');
       setSyncing(false);
     }
   };
@@ -287,7 +287,7 @@ function Dashboard() {
       )}
       {data?.syncing && (
         <div className="dashboard-notice" style={{ borderColor: 'rgba(108,142,191,0.3)', background: 'rgba(108,142,191,0.06)' }}>
-          <span style={{ color: 'var(--accent-blue)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Initial sync in progress — your data will appear shortly.</span>
+          <span style={{ color: 'var(--accent-blue)', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Initial sync in progress. Your data will appear shortly.</span>
         </div>
       )}
       {!hasAny && (
@@ -298,7 +298,7 @@ function Dashboard() {
           padding: '1.5rem',
           marginBottom: '1.5rem',
         }}>
-          <p style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.35rem' }}>Get started — connect your accounts</p>
+          <p style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.35rem' }}>Get started: connect your accounts</p>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
             DevAct can't show you anything until it knows where to pull data from.
           </p>
@@ -591,7 +591,7 @@ function Dashboard() {
         ) : user?.wakatimeConfiguredAt && !data?.wakatime ? (
           <div className="dashboard-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {isStalled(user.wakatimeConfiguredAt)
-              ? <p style={{ color: 'var(--error)', fontSize: '0.875rem' }}>WakaTime sync failed — try syncing manually.</p>
+              ? <p style={{ color: 'var(--error)', fontSize: '0.875rem' }}>WakaTime sync failed. Try syncing manually.</p>
               : <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Loader size={14} className="spinning" /> Syncing WakaTime…</p>
             }
           </div>
