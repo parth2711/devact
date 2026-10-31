@@ -3,7 +3,12 @@ import { createRequire } from 'module';
 import path from 'path';
 
 const require = createRequire(import.meta.url);
-const mongoose = require(path.resolve(process.cwd(), 'server/node_modules/mongoose'));
+let mongoose;
+try {
+  mongoose = require(path.resolve(process.cwd(), 'server/node_modules/mongoose'));
+} catch {
+  mongoose = require('mongoose');
+}
 const connectDB = require('../server/config/db');
 
 process.env.MONGO_URI = 'mongodb://localhost:27017/test_devact';

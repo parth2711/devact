@@ -28,11 +28,24 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: npm ci || npm install
+
+      - name: Install server dependencies
+        working-directory: server
         run: npm ci || npm install
 
       - name: Run automated test suite
         run: npm test
+        env:
+          CI: true
+          NODE_ENV: test
+          JWT_SECRET: test_jwt_secret_for_ci_environment_devact
+          SESSION_SECRET: test_session_secret_for_ci_environment_devact
+          ENCRYPTION_KEY: 12345678901234567890123456789012
+          FRONTEND_URL: http://localhost:5173
+          CRON_SECRET: test_cron_secret_for_ci_environment_devact
+          MONGO_URI: mongodb://localhost:27017/test_devact
 
   build:
     name: Frontend Build
