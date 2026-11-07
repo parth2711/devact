@@ -1,40 +1,80 @@
 # DevAct
 
-A developer activity tracking platform that aggregates GitHub contributions, competitive programming stats, coding time, and more into a clean unified dashboard.
+DevAct is a centralized developer analytics platform that aggregates activity from GitHub, competitive programming platforms, coding timers, and package managers into a unified dashboard.
 
-Live at **[devact.vercel.app](https://devact.vercel.app)**
+Deployment: [devact.vercel.app](https://devact.vercel.app)
 
-Built with the MERN stack (MongoDB, Express, React, Node.js).
+---
+
+## Overview
+
+DevAct collects and correlates data across multiple developer platforms to provide visibility into coding consistency, problem-solving skills, and open-source contributions. The application features periodic data synchronization, historical metric snapshots, a public portfolio page, and an optional AI-driven repository review engine.
 
 ---
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **GitHub Tracker** | Monitor commits, PRs, and contribution streaks across all repositories |
-| **CP Tracker** | Codeforces ratings, LeetCode progress, and full contest history |
-| **Repo Visualizer** | Language breakdowns, star counts, and activity across your repos |
-| **Practice Review** | Problems you attempted but didn't solve — with editorial links |
-| **WakaTime Integration** | Weekly coding time and per-language breakdown |
-| **Stack Overflow** | Reputation, badges, and top answers |
-| **npm / PyPI Packages** | Weekly download stats for your open-source packages |
-| **Trend Charts** | 30-day history charts for ratings, solved count, and GitHub stars |
-| **Shadow Dashboard** | Toggle into the "Shadow Board" to view anti-metrics like longest zero-commit streak and abandoned repos |
-| **Skill Decay Monitor** | Track languages and CP tags you haven't touched in >30 days and discover quick refresher tasks |
-| **Public Profile** | Shareable developer profile at `/u/:username` |
-| **Authentication** | JWT-based login, registration, and GitHub OAuth |
+### Activity and Version Control
+- **GitHub Metrics:** Tracks commit activity, contribution streaks, pull requests, and repository statistics via the GitHub REST API.
+- **Repository Visualizer:** Displays repository distributions, top languages, stargazers, and commit frequency.
+- **AI Repository Analysis:** Evaluates repository structure and documentation quality using the Google Gemini API.
+- **WakaTime Metrics:** Displays rolling 7-day coding duration and language usage breakdowns with encrypted credential storage.
+
+### Competitive Programming
+- **Multi-Platform Ratings:** Aggregates live ratings, ranks, and contest histories from Codeforces and LeetCode.
+- **Topic and Difficulty Breakdown:** Categorizes solved problems by difficulty tier and algorithmic tags.
+- **Contest Schedules:** Aggregates upcoming and ongoing contests across Codeforces and LeetCode with countdown timers and direct links.
+- **Practice Review:** Tracks attempted but unsolved problems with direct references to solution editorials.
+
+### Package and Community Statistics
+- **Open Source Packages:** Tracks weekly and monthly download counts for packages published to npm and PyPI.
+- **Stack Overflow:** Displays reputation milestones, badge distributions, and top community answers.
+
+### Analytics and Developer Health
+- **Trend Charts:** Visualizes 30-day historical trajectories for competitive programming ratings, solved problems, and GitHub stars.
+- **Skill Decay Monitor:** Detects languages and algorithms untouched for more than 30 days and suggests refreshers.
+- **Shadow Dashboard:** Exposes anti-metrics such as dormant repositories and extended inactive streaks to help identify abandoned work.
+- **Developer Journal:** Daily work logging with mood tracking, tags, and progress notes.
+
+### Platform and Security
+- **Public Profiles:** Shareable developer profiles available at `/u/:username`.
+- **Authentication:** Local authentication with bcryptjs and JWT (stored in httpOnly cookies), alongside GitHub OAuth 2.0.
+- **Credential Encryption:** Third-party secrets (such as WakaTime API keys) are encrypted at rest using AES-256-CBC.
+- **Scheduled Synchronization:** Automatic background sync with daily snapshots and rate-limit handling.
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** React (Vite), React Router, Recharts, Axios
-- **Backend:** Node.js, Express.js, Passport.js
-- **Database:** MongoDB Atlas, Mongoose
-- **Auth:** JWT (httpOnly cookies), bcryptjs, GitHub OAuth2
-- **APIs:** GitHub REST, Codeforces, LeetCode GraphQL, WakaTime, Stack Overflow, npm Registry, PyPI
-- **Deployment:** Vercel (monorepo — client + server)
+### Frontend
+- **Framework:** React 19 with Vite
+- **Routing:** React Router 7
+- **Charts and Visualization:** Recharts
+- **HTTP Client:** Axios
+- **Icons:** Lucide React
+
+### Backend
+- **Runtime:** Node.js
+- **Framework:** Express 4
+- **Database ODM:** Mongoose 8
+- **Authentication:** Passport.js (GitHub OAuth 2.0), JSON Web Tokens (JWT)
+- **Security:** Helmet, express-rate-limit, bcryptjs
+- **Scheduler:** node-cron (local), Vercel Cron handler (serverless)
+
+### Database and Infrastructure
+- **Database:** MongoDB Atlas
+- **Hosting:** Vercel (monorepo configuration for static client assets and serverless API endpoints)
+- **Testing:** Vitest, Supertest
+
+### External APIs
+- GitHub REST API
+- Codeforces API
+- LeetCode GraphQL API
+- WakaTime API
+- Stack Exchange API
+- npm Registry API
+- PyPI Stats API
+- Google Gemini API
 
 ---
 
@@ -42,23 +82,27 @@ Built with the MERN stack (MongoDB, Express, React, Node.js).
 
 ```
 devact/
-├── client/                 # React frontend (Vite)
+├── api/                    # Vercel serverless function entrypoints
+│   ├── cron/sync.js        # Scheduled background synchronization endpoint
+│   └── index.js            # Express serverless handler
+├── client/                 # React frontend application (Vite)
 │   └── src/
-│       ├── api/            # Axios instance
-│       ├── components/     # Navbar, Footer, ProtectedRoute
-│       ├── context/        # AuthContext
-│       └── pages/          # Dashboard, GitHubTracker, CPTracker, RepoVisualizer,
-│                           # PracticeReview, Profile, ManageAccount, PublicProfile
-├── server/                 # Express backend
-│   ├── config/             # DB connection, Passport config
-│   ├── controllers/        # Route handlers
-│   ├── cron/               # Daily sync cron job
-│   ├── middleware/         # Auth + rate limiter
-│   ├── models/             # Mongoose schemas (User, SyncData, DailySnapshot)
-│   ├── routes/             # API route definitions
-│   └── services/           # External API integrations
-├── .env.example            # Environment variables template
-└── package.json            # Root scripts (concurrently)
+│       ├── api/            # Axios instance and API client configuration
+│       ├── components/     # Reusable UI components, modals, and loaders
+│       ├── context/        # Authentication and global state providers
+│       └── pages/          # Application views and dashboard pages
+├── server/                 # Express backend application
+│   ├── config/             # Database connection and Passport strategy configurations
+│   ├── controllers/        # Route handlers and controller logic
+│   ├── cron/               # Scheduled synchronization routines
+│   ├── middleware/         # Authentication, rate limiting, and validation middleware
+│   ├── models/             # Mongoose schemas (User, SyncData, DailySnapshot, etc.)
+│   ├── routes/             # REST API route declarations
+│   └── services/           # Third-party platform integrations
+├── tests/                  # Integration and unit test suite
+├── .env.example            # Environment variable template
+├── package.json            # Monorepo workspace configuration and root scripts
+└── vercel.json             # Vercel deployment routes and serverless bundle config
 ```
 
 ---
@@ -66,67 +110,91 @@ devact/
 ## Getting Started
 
 ### Prerequisites
-- Node.js >= 18
-- MongoDB (local or [Atlas](https://www.mongodb.com/atlas))
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+- MongoDB instance (local or MongoDB Atlas connection string)
 
-### Setup
+### Installation
 
-```bash
-# Clone the repo
-git clone https://github.com/parth2711/devact.git
-cd devact
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/parth2711/devact.git
+   cd devact
+   ```
 
-# Copy environment config and fill in values
-cp .env.example .env
+2. Create and configure the environment file:
+   ```bash
+   cp .env.example .env
+   ```
 
-# Install all dependencies (root + server + client)
-npm run install-all
+3. Install all dependencies across the root, client, and server packages:
+   ```bash
+   npm run install-all
+   ```
 
-# Start development (client + server concurrently)
-npm run dev
-```
+4. Run the development environment:
+   ```bash
+   npm run dev
+   ```
 
-Client runs on `http://localhost:5173`, server on `http://localhost:5000`.
-
-### Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `MONGO_URI` | ✅ | MongoDB connection string |
-| `JWT_SECRET` | ✅ | Secret for signing JWT tokens |
-| `FRONTEND_URL` | ✅ | Frontend origin for CORS (e.g. `http://localhost:5173`) |
-| `ENCRYPTION_KEY` | ✅ | Exactly 32-byte key for encrypting WakaTime tokens |
-| `JWT_EXPIRE` | No | Token expiry duration (default: `7d`) |
-| `GITHUB_TOKEN` | Recommended | GitHub PAT — raises API rate limit from 60 to 5000/hr |
-| `GITHUB_CLIENT_ID` | OAuth | GitHub OAuth App client ID |
-| `GITHUB_CLIENT_SECRET` | OAuth | GitHub OAuth App client secret |
-| `GEMINI_API_KEY` | AI features | Google Gemini API key for AI insights |
-
-### Scripts
-
-| Script | Description |
-|---|---|
-| `npm run dev` | Start client + server concurrently |
-| `npm run client` | Start React dev server only |
-| `npm run server` | Start Express server only |
-| `npm run install-all` | Install all dependencies |
+The client application will be accessible at `http://localhost:5173`, and the API server will run on `http://localhost:5000`.
 
 ---
 
-## Branch Strategy
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `PORT` | No | `5000` | Port for the Express backend server |
+| `NODE_ENV` | No | `development` | Application runtime environment (`development`, `production`, `test`) |
+| `MONGO_URI` | Yes | None | MongoDB connection string |
+| `JWT_SECRET` | Yes | None | Secret key used to sign JSON Web Tokens |
+| `JWT_EXPIRE` | No | `7d` | Expiration window for JWT tokens |
+| `SESSION_SECRET` | Yes | None | Secret key used for session handling |
+| `ENCRYPTION_KEY` | Yes | None | Exactly 32-character key for AES-256 encryption of user API tokens |
+| `FRONTEND_URL` | Yes | `http://localhost:5173` | Allowed origin for CORS policies and OAuth redirects |
+| `GITHUB_TOKEN` | No | None | GitHub Personal Access Token to raise API rate limits from 60 to 5,000 requests/hour |
+| `GITHUB_CLIENT_ID` | No | None | Client ID for GitHub OAuth authentication |
+| `GITHUB_CLIENT_SECRET` | No | None | Client secret for GitHub OAuth authentication |
+| `GITHUB_CALLBACK_URL` | No | `http://localhost:5000/api/auth/github/callback` | Callback URL for GitHub OAuth redirection |
+| `GEMINI_API_KEY` | No | None | Google Gemini API key for automated repository code reviews |
+| `CRON_SECRET` | No | None | Bearer token to authorize scheduled synchronization requests to `/api/cron/sync` |
+
+> Note: To generate secure 32-byte hexadecimal strings for `JWT_SECRET`, `SESSION_SECRET`, or `ENCRYPTION_KEY`, run:
+> ```bash
+> node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+> ```
+
+---
+
+## Available Scripts
+
+| Script | Command | Description |
+|---|---|---|
+| `npm run dev` | `concurrently "npm run server" "npm run client"` | Starts backend and frontend development servers concurrently |
+| `npm run server` | `cd server && npm run dev` | Starts the Express server with nodemon |
+| `npm run client` | `cd client && npm run dev` | Starts the Vite development server for the frontend |
+| `npm run install-all` | `npm install && cd server && npm install && cd ../client && npm install` | Installs root, server, and client dependencies |
+| `npm test` | `vitest run` | Executes backend test suites |
+| `npm run vercel-build` | `npm install && cd server && npm install && cd ../client && npm install && npm run build` | Builds frontend assets for Vercel production deployment |
+
+---
+
+## Branching Strategy
 
 | Branch | Purpose |
 |---|---|
-| `main` | Production — auto-deploys to Vercel |
-| `development` | Active development — features merge here first |
-| `feature/*` | Individual feature branches |
+| `main` | Production branch. Automatic continuous deployment to Vercel. |
+| `development` | Main integration branch. Features merge here before production release. |
+| `feature/*` | Isolated feature branches created from `development`. |
 
 ---
 
-## Known Limitations
+## Operational Notes
 
-- **Handle changes:** If you change your GitHub username or Codeforces handle and update your profile, old `DailySnapshot` entries remain. Trend charts may show a temporary discontinuity until new snapshots accumulate.
-- **WakaTime sync:** Requires a valid API key configured in your profile. Data reflects the past 7 days as returned by the WakaTime API.
+- **Handle Updates:** When updating a linked GitHub username or Codeforces handle, existing `DailySnapshot` entries remain linked to the account. Snapshot continuity resumes as new data synchronizes under the new handle.
+- **WakaTime Sync:** Requires an active WakaTime API key configured in user settings. Data is fetched for a rolling 7-day window.
+- **Rate Limit Management:** When `GITHUB_TOKEN` is unset, GitHub API requests use unauthenticated quotas (60 requests per hour per IP). Configuring a token increases the limit to 5,000 requests per hour.
 
 ---
 
